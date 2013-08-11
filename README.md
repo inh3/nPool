@@ -274,7 +274,7 @@ var unitOfWork = {
 		// function that will be called on main Node.js when the task is complete
 		callbackFunction: fibonacciCallbackFunction,
 
-		// context that the unit of work function will be called in
+		// context that the callbackFunction will be called in
 		callbackContext: someOtherObject
 };
 ```
