@@ -1,40 +1,37 @@
 # nPool
 
-nPool is a platform independent, unit of work based, thread pool add-on for Node.js.
+A platform independent, unit of work based, thread pool [add-on for Node.js](http://nodejs.org/api/addons.html).
 
-nPool's primary features and benefits include:
+**nPool's primary features and benefits include:**
 
+ * Linux, Mac and Windows support
  * Efficient and straightforward interface
  * Transparent marshalling of javascript objects in and out of the thread pool
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
  * Support for UTF-8 strings
 
-## Supported Platforms ##
+## The Implementation
 
- * Mac OS X (Tested on Mac OS X 10.8.4)  
- * Windows (Tested on Windows 8 x64 Professional)  
- * Linux (Tested on Debian 7.0 Wheezy 3.2.46-1 x86_64)
+nPool is written entirely in C/C++.  The thread pool and synchronization frameworks are written in C and the Node.js/V8 add-on interface is written in C++.  The library has no third-party dependencies other than [Node.js](http://nodejs.org/) and [V8](https://code.google.com/p/v8/).
 
-## The Implementation ##
+The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Unix.  On Windows, native threads ([`CreateThread`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms684841)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Work is performed via a FIFO queue that is processed by the thread pool following a unit of work pattern.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via libuv’s [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
 
-nPool is written entirely in C/C++.  The thread pool and synchronization frameworks are written in C and the Node.js/V8 add-on interface is written in C++.  The library has no third-party dependencies other than Node.js and V8.
+One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container/unordered_map) are used within the add-on interface, therefore, it is necessary that the platform of choice provides [C++11](http://en.wikipedia.org/wiki/C%2B%2B11) (Windows and Linux) or [TR1](http://en.wikipedia.org/wiki/C%2B%2B_Technical_Report_1) (Apple) implementations of the standard library.
 
-The cross-platform threading component utilizes POSIX threads for Mac and Unix.  On Windows, native threads and critical sections are used.  Work is performed via a FIFO queue that is processed by the thread pool following a unit of work pattern.  Each thread within the thread pool utilizes a distinct V8 isolate to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via libuv’s async inter-thread communication mechanism.
-
-One thing to note, unordered_maps are used within the add-on interface, therefore, it is necessary that the platform of choice provides C++11 (Windows and Linux) or TR1 (Apple) implementations of the standard library.
-
-## API Documentation ##
+## API Documentation
 
 nPool provides a very simple and efficient interface.  There are a total of 5 functions:
 
-1. `createThreadPool`
-2. `destroyThreadPool`
-3. `loadFile`
-4. `removeFile`
-5. `queueWorkUnit`
+1. [`createThreadPool`] (#createthreadpool)
+2. [`destroyThreadPool`] (#destroythreadpool)
+3. [`loadFile`] (#loadfile)
+4. [`removeFile`] (#removefile)
+5. [`queueWork`] (#queuework)
 
-### Functions
+---
+
+### createThreadPool
 
 ```js
 createThreadPool(numThreads)
@@ -44,9 +41,9 @@ This function creates the thread pool.  At this time, the module only supports o
 
 The function takes one parameter:
 
- * `numThreads` (uint32) - number of threads to create within the thread pool
+ * `numThreads` *uint32* - number of threads to create within the thread pool
 
-Example:
+**Example:**
 
 ```js
 // create thread pool with two threads
@@ -54,6 +51,8 @@ nPool.createThreadPool(2);
 ```
 
 ---
+
+### destroyThreadPool
 
 ```js
 destroyThreadPool()
@@ -63,14 +62,16 @@ This function destroys the thread pool.  This function should only be called onc
 
 This function takes no parameters.
 
-Example:
+**Example:**
 
- ```js
+```js
 // destroy the thread pool
 nPool.destroyThreadPool();
 ```
 
 ---
+
+### loadFile
 
 ```js
 loadFile(fileKey, filePath)
@@ -84,12 +85,12 @@ This function can be called at any time.  It should be noted that this is a sync
 
 This function takes two parameters:
 
- * `fileKey` (uint32) - uniquely identifies a file
- * `filePath` (string) - path to javascript file to be cached
+ * `fileKey` *uint32* - uniquely identifies a file
+ * `filePath` *string* - path to javascript file to be cached
 
 Each file must have a unique key.
 
-Example:
+**Example:**
 
 ```js
 // load files defining object types
@@ -99,6 +100,8 @@ nPool.loadFile(2, './fileB.js');
 
 ---
 
+### removeFile
+
 ```js
 removeFile(fileKey)
 ```
@@ -107,11 +110,11 @@ This function removes a javascript file from the file cache.  This function can 
 
 This function takes one parameter:
 
- * `fileKey` (uint32) - unique key for a loaded file
+ * `fileKey` *uint32* - unique key for a loaded file
 
 There must exist a file for the given key.
 
-Example:
+**Example:**
 
 ```js
 // remove file associated with fileKey: 1
@@ -120,8 +123,10 @@ nPool.removeFile(1);
 
 ---
 
+### queueWork
+
 ```js
-queueWorkUnit(unitOfWorkObject)
+queueWork(unitOfWorkObject)
 ```
 
 This function queues a unit of work for execution on the thread pool.  This function should be called after `createThreadPool` and prior to `destroyThreadPool`.
@@ -130,22 +135,22 @@ The function takes one parameter, a unit of work object which contains specific 
 
 A `unitOfWorkObject` contains the following named properties:
 
- * `workId` (uint32) - This parameter is a unique integer that identifies a unit of work.  This integer is later passed as a parameter to the work complete callback function.
+ * `workId` *uint32* - This parameter is a unique integer that identifies a unit of work.  This integer is later passed as a parameter to the work complete callback function.
 
- * `fileKey` (uint32) - This parameter is an integer that is used as a key to reference a file that was previously cached via the loadFile function.  At this time there is no run-time logic to handle the a case when a file key does not reference a previously loaded file.  Therefore, ensure that a file exists for the given key.
+ * `fileKey` *uint32* - This parameter is an integer that is used as a key to reference a file that was previously cached via the loadFile function.  At this time there is no run-time logic to handle the a case when a file key does not reference a previously loaded file.  Therefore, ensure that a file exists for the given key.
 
- * `workFunction` (string) - This parameter is a string that declares the name of a function.  This function name will be used in conjunction with the fileKey in order to reference a specific object instance method.   The function name must match a method on the object type that is defined by the file associated with the given fileKey.  The method will be called from within a background thread to process the unit of work object passed to queueWork.
+ * `workFunction` *string* - This parameter is a string that declares the name of a function.  This function name will be used in conjunction with the fileKey in order to reference a specific object instance method.   The function name must match a method on the object type that is defined by the file associated with the given fileKey.  The method will be called from within a background thread to process the unit of work object passed to queueWork.
 
- * `workParam` (object) - This is user defined object that defines a unit of work.  The object will be passed as the only parameter to the object instance method that is executed in the thread pool.  Any function properties on the object will not be available when it is used in the thread pool because serialization does not support packing functions.
+ * `workParam` *object* - This is user defined object that defines a unit of work.  The object will be passed as the only parameter to the object instance method that is executed in the thread pool.  Any function properties on the object will not be available when it is used in the thread pool because serialization does not support packing functions.
 
- * `callbackFunction` (function) - This property specifies the work complete callback function.  The function is executed on the main Node.js thread.
+ * `callbackFunction` *function* - This property specifies the work complete callback function.  The function is executed on the main Node.js thread.
 The work complete callback function takes two parameters:
-  * `callbackObject` (object) - the object that is returned by the workFunction
-  * `workId` (uint32) -  the unique identifier, workId, that was passed with the unit of work when it was queued
+  * `callbackObject` *object* - the object that is returned by the workFunction
+  * `workId` *uint32* -  the unique identifier, workId, that was passed with the unit of work when it was queued
 
- * `callbackContext` (context) - This property specifies the context (`this`) of the `callbackFunction` when it is called.
+ * `callbackContext` *context* - This property specifies the context (`this`) of the `callbackFunction` when it is called.
 
-Example:
+**Example:**
 
 ```js
 // create the unit of work object
@@ -176,6 +181,40 @@ var unitOfWork = {
 };
 ```
 ```js
+// queue the unit of work
+nPool.queueWork(unitOfWork);
+```
+
+---
+
+### Putting it all together
+
+```js
+// load nPool module
+var nPool = require('npool');
+
+// work complete callback from thread pool 
+var callbackFunction = function (callbackObject, workId) { ... }
+
+// load files defining object types
+nPool.loadFile(1, './objectType.js');
+
+// create thread pool with two threads
+nPool.createThreadPool(2);
+
+// create the unit of work object
+var unitOfWork = {
+    workId: 9124,
+    fileKey: 1,
+    workFunction: "objectMethod",
+    workParam: {
+        aProperty: [ 134532, "xysaf" ]
+    },
+
+    callbackFunction: callbackFunction,
+    callbackContext: this
+}
+
 // queue the unit of work
 nPool.queueWork(unitOfWork);
 ```
