@@ -66,7 +66,7 @@ nPool.createThreadPool(2);
 nPool.destroyThreadPool();
 ```
 
- ---
+---
 
 3. `loadFile(fileKey, filePath)`
 
@@ -91,7 +91,7 @@ nPool.loadFile(1, './fileA.js');
 nPool.loadFile(2, './fileB.js');
 ```
 
- ---
+---
 
 4. `removeFile(fileKey)`
 
@@ -110,7 +110,7 @@ nPool.loadFile(2, './fileB.js');
 nPool.removeFile(1);
 ```
 
- ---
+---
 
 5. `queueWorkUnit(unitOfWorkObject)`
 
@@ -164,7 +164,8 @@ var unitOfWork = {
   	// context that the unit of work function will be called in
   	callbackContext: someOtherObject
 };
-
+```
+```js
 // queue the unit of work
 nPool.queueWork(unitOfWork);
- ```
+```
