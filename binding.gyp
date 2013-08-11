@@ -25,12 +25,12 @@
         'conditions': [
             ['OS=="linux"', {
                 'cflags': [
-                    '-std=c++11'
+                    '-std=c++0x'
                 ]
             }],
             ['OS=="mac"', {
                 'cflags': [
-                    '-std=c++0x',
+                    '-std=c++11',
                     '-stdlib=libc++'
                 ]
             }]
