@@ -135,6 +135,8 @@ uint32 workId -  the unique identifier, workId, that was passed with the unit of
 
  * `callbackContext` (context) - This property specifies the context (`this`) of the callbackFunction when it is called.
 
+ Example:
+
  ```js
 // create the unit of work object
 var unitOfWork = {
@@ -165,4 +167,4 @@ var unitOfWork = {
 
 // queue the unit of work
 nPool.queueWork(unitOfWork);
-```
+ ```
