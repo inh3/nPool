@@ -2,6 +2,8 @@
 
 A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/addons.html).
 
+[![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool)
+
 **nPool's primary features and benefits include:**
 
  * Linux, Mac and Windows support
