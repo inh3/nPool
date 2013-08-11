@@ -16,6 +16,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 ## Table of Contents
 
 * [The Implementation](#the-implementation)
+* [Installation](#installation)
 * [Building From Source](#buiding-from-source)
 * [API Documentation](#api-documentation)
 * [License](#license)
@@ -27,6 +28,10 @@ nPool is written entirely in C/C++.  The thread pool and synchronization framewo
 The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Unix.  On Windows, native threads ([`CreateThread`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682453)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Task based units of work are performed via a FIFO queue that is processed by the thread pool.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via [libuv’s](http://nikhilm.github.io/uvbook/introduction.html) [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
 
 One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container/unordered_map) are used within the add-on interface, therefore, it is necessary that the platform of choice provides [C++11](http://en.wikipedia.org/wiki/C%2B%2B11) (Windows and Linux) or [TR1](http://en.wikipedia.org/wiki/C%2B%2B_Technical_Report_1) (Apple) implementations of the standard library.
+
+## Installation
+
+`npm install npool`
 
 ## Building From Source
 
