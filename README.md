@@ -45,10 +45,16 @@ This will automatically configure the environment and produce the add-on module.
 
 * Node.js 0.10.* or later
 * Standard C and C++ libraries
- * Windows and Unix: C++11
+ * Windows: C++11
+ * Unix: C++0x
  * Mac: TR1
+* Core GNU build toolchain
 
-*Windows requires a Visual Studio Express installation that provides the native C++ Windows SDK environment.*
+*Currently during development the following compilers are tested:*
+ * gcc 4.6
+ * gcc 4.7.2
+ * clang 4.2
+ * Visual Studio Express 2012 for Windows Desktop (msbuild.exe)
 
 ## API Documentation
 
