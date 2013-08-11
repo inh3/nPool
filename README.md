@@ -151,8 +151,37 @@ Each file must have a unique key.
 
 ```js
 // load files defining object types
-nPool.loadFile(1, './fileA.js');
-nPool.loadFile(2, './fileB.js');
+nPool.loadFile(1, './objectType.js');
+```
+
+Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object should not store state.
+
+An example file is given below:
+
+```js
+// ./objectType.js
+
+// object type function prototype
+var ObjectType = function () {
+
+	// private function
+    function privateFunction(workParam) {
+        return "I am a private function";
+    };
+
+    // function that matches the unit of work defined work function
+    this.objectMethod = function (workParam) {
+        var callbackObject = {
+            "objectProperty": privateFunction(workParam)
+        };
+
+        // return a single object
+        return callbackObject;
+    };
+};
+
+// make this available to the calling context
+this.ObjectType = ObjectType;
 ```
 
 ---
