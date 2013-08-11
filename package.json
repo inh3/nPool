@@ -2,7 +2,7 @@
   "preferGlobal": false,
 
   "name": "npool",
-  "version": "1.0.1",
+  "version": "1.0.2",
 
   "description": "A platform independent thread pool add-on for Node.js",
   "keywords": [
@@ -41,7 +41,7 @@
 
   "license": "BSD",
 
-  "os": ["mac", "linux", "win"],
+  "os": ["mac", "linux", "win32"],
 
   "engines": {
     "node": ">= 0.10.0"
