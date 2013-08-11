@@ -165,7 +165,7 @@ Each file must have a unique key.
 nPool.loadFile(1, './objectType.js');
 ```
 
-Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object should not store state.
+Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object is used as a service and should be stateless.
 
 An example file is given below:
 
