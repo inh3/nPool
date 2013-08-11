@@ -36,7 +36,9 @@ nPool provides a very simple and efficient interface.  There are a total of 5 fu
 
 ### Functions
 
-1. ```js createThreadPool(numThreads)```
+1. ```js
+createThreadPool(numThreads)
+```
  
  This function creates the thread pool.  At this time, the module only supports one thread pool per Node.js process.  Therefore, this function should only be called once, prior to `queueWork` or `destroyThreadPool`.
 
@@ -46,14 +48,16 @@ nPool provides a very simple and efficient interface.  There are a total of 5 fu
 
  Example:
 
- ```javascript
+ ```js
 // create thread pool with two threads
 nPool.createThreadPool(2);
 ```
 
 ---
 
-2. ```js destroyThreadPool()```
+2. ```
+js destroyThreadPool()
+```
 
  This function destroys the thread pool.  This function should only be called once and only when there will be no subsequent calls to the queueWorkUnit function.  This method can be called safely even if there are tasks still in progress.  At a lower level, this actually signals all threads to exit, but causes the main thread to block until all threads finish their currently executing in-progress units of work.  This does block the main Node.js thread, so this should only be executed when the process is terminating.
 
@@ -61,7 +65,7 @@ nPool.createThreadPool(2);
 
  Example:
 
- ```javascript
+ ```js
 // destroy the thread pool
 nPool.destroyThreadPool();
 ```
@@ -85,7 +89,7 @@ nPool.destroyThreadPool();
 
  Example:
 
- ```javascript
+ ```js
 // load files defining object types
 nPool.loadFile(1, './fileA.js');
 nPool.loadFile(2, './fileB.js');
@@ -93,7 +97,9 @@ nPool.loadFile(2, './fileB.js');
 
 ---
 
-4. ```js removeFile(fileKey)```
+4. ```js
+removeFile(fileKey)
+```
 
  This function removes a javascript file from the file cache.  This function can be called at any time, with one caveat.  The user should take care to not remove files that are currently referenced in pending units of work that have yet to be processed by the thread pool.
 
@@ -105,7 +111,7 @@ nPool.loadFile(2, './fileB.js');
 
  Example:
 
- ```javascript
+ ```js
 // remove file associated with fileKey: 1
 nPool.removeFile(1);
 ```
