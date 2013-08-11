@@ -2,5 +2,5 @@ language: node_js
 node_js:
   - 0.10
 scripts:
-	- Building nPool add-on...
-	- npm rebuild
+  - Building nPool add-on...
+  - npm rebuild
