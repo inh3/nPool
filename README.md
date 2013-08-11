@@ -36,7 +36,7 @@ nPool provides a very simple and efficient interface.  There are a total of 5 fu
 
 ### Functions
 
-1. `createThreadPool(numThreads)`
+1. ```js createThreadPool(numThreads)```
  
  This function creates the thread pool.  At this time, the module only supports one thread pool per Node.js process.  Therefore, this function should only be called once, prior to `queueWork` or `destroyThreadPool`.
 
@@ -53,7 +53,7 @@ nPool.createThreadPool(2);
 
 ---
 
-2. `destroyThreadPool()`
+2. ```js destroyThreadPool()```
 
  This function destroys the thread pool.  This function should only be called once and only when there will be no subsequent calls to the queueWorkUnit function.  This method can be called safely even if there are tasks still in progress.  At a lower level, this actually signals all threads to exit, but causes the main thread to block until all threads finish their currently executing in-progress units of work.  This does block the main Node.js thread, so this should only be executed when the process is terminating.
 
@@ -68,7 +68,7 @@ nPool.destroyThreadPool();
 
 ---
 
-3. `loadFile(fileKey, filePath)`
+3. ```js loadFile(fileKey, filePath)```
 
  This function serializes a javascript file that contains a constructor function for an object type.  The file buffer will be cached on the Node.js main thread.
 
@@ -93,7 +93,7 @@ nPool.loadFile(2, './fileB.js');
 
 ---
 
-4. `removeFile(fileKey)`
+4. ```js removeFile(fileKey)```
 
  This function removes a javascript file from the file cache.  This function can be called at any time, with one caveat.  The user should take care to not remove files that are currently referenced in pending units of work that have yet to be processed by the thread pool.
 
@@ -112,7 +112,7 @@ nPool.removeFile(1);
 
 ---
 
-5. `queueWorkUnit(unitOfWorkObject)`
+5. ```js queueWorkUnit(unitOfWorkObject)```
 
  This function queues a unit of work for execution on the thread pool.  This function should be called after createThreadPool and prior to destroyThreadPool.
 
