@@ -46,7 +46,7 @@ This will automatically configure the environment and produce the add-on module.
 * Node.js 0.10.* or later
 * Standard C and C++ libraries
  * Windows: C++11
- * Unix: C++0x
+ * Linux: C++0x
  * Mac: TR1
 * Core GNU build toolchain
 
