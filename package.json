@@ -4,7 +4,7 @@
   "name": "npool",
   "version": "1.0.0",
 
-  "description": "A platform independent, unit of work based, thread pool add-on for Node.js",
+  "description": "A platform independent thread pool add-on for Node.js",
   "keywords": [
     "c",
     "c++",
@@ -16,7 +16,8 @@
     "thread",
     "threadpool",
     "thread pool",
-    "unit of work"
+    "unit of work",
+    "task"
   ],
 
   "author": {
