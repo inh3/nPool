@@ -19,6 +19,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 * [Installation](#installation)
 * [Building From Source](#buiding-from-source)
 * [API Documentation](#api-documentation)
+* [Future Development](#future-development)
 * [License](#license)
 
 ## The Implementation
@@ -281,6 +282,12 @@ var unitOfWork = {
 // queue the unit of work
 nPool.queueWork(unitOfWork);
 ```
+
+## Future Development
+
+1. Multiple thread pools per Node.js process
+2. Comprehensive error and exception handling
+3. Unit tests
 
 ## License
 
