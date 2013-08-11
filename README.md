@@ -161,7 +161,7 @@ var unitOfWork = {
 
   	// context that the unit of work function will be called in
   	callbackContext: someOtherObject
-}
+};
 
 // queue the unit of work
 nPool.queueWork(unitOfWork);
