@@ -55,7 +55,7 @@ nPool.createThreadPool(2);
 
 2. `destroyThreadPool()`
 
- This function destroys the thread pool.  This function should only be called once and only when there will be no subsequent calls to the queueWorkUnit function.  This method can be called safely even if there are tasks still in progress.  At a lower level, this actually signals all threads to exit, but causes the main thread to block until all threads finish their currently executing in-progress units of work.  This does block the main Node.js thread, so this should only be executed when the process is terminating.
+ This function destroys the thread pool.  This function should only be called once and only when there will be no subsequent calls to the `queueWorkUnit` function.  This method can be called safely even if there are tasks still in progress.  At a lower level, this actually signals all threads to exit, but causes the main thread to block until all threads finish their currently executing in-progress units of work.  This does block the main Node.js thread, so this should only be executed when the process is terminating.
 
  This function takes no parameters.
 
@@ -72,7 +72,7 @@ nPool.destroyThreadPool();
 
  This function serializes a javascript file that contains a constructor function for an object type.  The file buffer will be cached on the Node.js main thread.
 
- Each thread, on first execution with a unit of work which requires the file referenced by fileKey, will de-serialize and compile the contents into a V8 function. The function is used to instantiate a new persistent V8 object instance of the object type.  The persistent object instance is then cached per thread.  Every subsequent unit of work referencing the fileKey will retrieve the already cached object instance.
+ Each thread, on first execution with a unit of work which requires the file referenced by `fileKey`, will de-serialize and compile the contents into a V8 function. The function is used to instantiate a new persistent V8 object instance of the object type.  The persistent object instance is then cached per thread.  Every subsequent unit of work referencing the `fileKey` will retrieve the already cached object instance.
 
  This function can be called at any time.  It should be noted that this is a synchronous call, so the serialization of the file will occur on the main thread of the Node.js process.  That being said, it would be prudent to load all necessary files at process startup, especially since they will be cached in memory.
 
@@ -114,7 +114,7 @@ nPool.removeFile(1);
 
 5. `queueWorkUnit(unitOfWorkObject)`
 
- This function queues a unit of work for execution on the thread pool.  This function should be called after createThreadPool and prior to destroyThreadPool.
+ This function queues a unit of work for execution on the thread pool.  This function should be called after `createThreadPool` and prior to `destroyThreadPool`.
 
  The function takes one parameter, a unit of work object which contains specific and required properties.
 
@@ -130,10 +130,10 @@ nPool.removeFile(1);
 
  * `callbackFunction` (function) - This property specifies the work complete callback function.  The function is executed on the main Node.js thread.
 The work complete callback function takes two parameters:
-object callbackObject - the object that is returned by the workFunction
-uint32 workId -  the unique identifier, workId, that was passed with the unit of work when it was queued
+  * `callbackObject` (object) - the object that is returned by the workFunction
+  * `workId` (uint32) -  the unique identifier, workId, that was passed with the unit of work when it was queued
 
- * `callbackContext` (context) - This property specifies the context (`this`) of the callbackFunction when it is called.
+ * `callbackContext` (context) - This property specifies the context (`this`) of the `callbackFunction` when it is called.
 
  Example:
 
