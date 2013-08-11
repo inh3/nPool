@@ -12,9 +12,9 @@ nPool's primary features and benefits include:
 
 ## Supported Platforms ##
 
-Mac OS X (Tested on Mac OS X 10.8.4)  
-Windows (Tested on Windows 8 x64 Professional)  
-Linux (Tested on Debian 7.0 Wheezy 3.2.46-1 x86_64)
+ * Mac OS X (Tested on Mac OS X 10.8.4)  
+ * Windows (Tested on Windows 8 x64 Professional)  
+ * Linux (Tested on Debian 7.0 Wheezy 3.2.46-1 x86_64)
 
 ## The Implementation ##
 
