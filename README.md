@@ -139,30 +139,30 @@ uint32 workId -  the unique identifier, workId, that was passed with the unit of
 // create the unit of work object
 var unitOfWork = {
 
-	// unique identifer of unit of work
-    workId: 34290,
+  // unique identifer of unit of work
+  workId: 34290,
 
-    // object type file
-    fileKey: 1,
+  // object type file
+  fileKey: 1,
 
-    // object instance function to perform unit of work
-    workFunction: objectMethod,
+  // object instance function to perform unit of work
+  workFunction: objectMethod,
 
-    // object to be passed to work function
-    workParam: {
-        arrayProperty: [ ... ],
-        objectProperty: { ... },
-        valueProperty: 123,
-        stringProperty: "abcd"
-    },
+  // object to be passed to work function
+  workParam: {
+    arrayProperty: [ ... ],
+    objectProperty: { ... },
+    valueProperty: 123,
+    stringProperty: "abcd"
+  },
 
-    // function that will be called on main Node.js when the task is complete
-    callbackFunction: fibonacciCallbackFunction,
+  // function that will be called on main Node.js when the task is complete
+  callbackFunction: fibonacciCallbackFunction,
 
-    // context that the unit of work function will be called in
-    callbackContext: someOtherObject
+  // context that the unit of work function will be called in
+  callbackContext: someOtherObject
 }
 
 // queue the unit of work
-nPool.queueWork(unitOfWork);   
+nPool.queueWork(unitOfWork);
 ```
