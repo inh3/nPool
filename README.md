@@ -155,14 +155,14 @@ var unitOfWork = {
 		arrayProperty: [ ... ],
 		objectProperty: { ... },
 		valueProperty: 123,
-    	stringProperty: "abcd"
-  	},
+		stringProperty: "abcd"
+	},
 
 	// function that will be called on main Node.js when the task is complete
-  	callbackFunction: fibonacciCallbackFunction,
+	callbackFunction: fibonacciCallbackFunction,
 
-  	// context that the unit of work function will be called in
-  	callbackContext: someOtherObject
+	// context that the unit of work function will be called in
+	callbackContext: someOtherObject
 };
 ```
 ```js
