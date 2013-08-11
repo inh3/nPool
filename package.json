@@ -1,0 +1,48 @@
+{
+  "preferGlobal": false,
+
+  "name": "npool",
+  "version": "1.0.0",
+
+  "description": "A platform independent, unit of work based, thread pool add-on for Node.js",
+  "keywords": [
+    "c",
+    "c++",
+    "addon",
+    "module",
+    "pthread",
+    "native",
+    "async",
+    "thread",
+    "threadpool",
+    "thread pool",
+    "unit of work"
+  ],
+
+  "author": {
+      "name": "Ivan Hall",
+      "email": "ivan.hall@gmail.com"
+  },
+
+  "homepage": "https://github.com/inh3",
+
+   "repository": {
+    "type": "git",
+    "url": "https://github.com/inh3"
+  },
+
+  "bugs": {
+    "url":    "https://github.com/inh3",
+    "email":  "ivan.hall@gmail.com"
+  },
+
+  "analyze": false,
+
+  "license": "BSD",
+
+  "os": ["mac", "linux", "win"],
+
+  "engines": {
+    "node": ">= 0.10.0"
+  }
+}
