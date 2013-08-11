@@ -2,7 +2,7 @@
   "preferGlobal": false,
 
   "name": "npool",
-  "version": "1.0.0",
+  "version": "1.0.1",
 
   "description": "A platform independent thread pool add-on for Node.js",
   "keywords": [
@@ -25,15 +25,15 @@
       "email": "ivan.hall@gmail.com"
   },
 
-  "homepage": "https://github.com/inh3",
+  "homepage": "https://github.com/inh3/nPool",
 
    "repository": {
     "type": "git",
-    "url": "https://github.com/inh3"
+    "url": "https://github.com/inh3/nPool"
   },
 
   "bugs": {
-    "url":    "https://github.com/inh3",
+    "url":    "https://github.com/inh3/nPool/issues",
     "email":  "ivan.hall@gmail.com"
   },
 
