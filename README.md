@@ -148,7 +148,7 @@ var unitOfWork = {
 	fileKey: 1,
 
 	// object instance function to perform unit of work
-	workFunction: objectMethod,
+	workFunction: "objectMethodName",
 
 	// object to be passed to work function
 	workParam: {
