@@ -18,6 +18,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 * [The Implementation](#the-implementation)
 * [Installation](#installation)
 * [Building From Source](#buiding-from-source)
+* [Example](#example)
 * [API Documentation](#api-documentation)
 * [Future Development](#future-development)
 * [License](#license)
@@ -58,6 +59,10 @@ This will automatically configure the environment and produce the add-on module.
  * gcc 4.7.2
  * clang 4.2
  * Visual Studio Express 2012 for Windows Desktop (msbuild.exe)
+
+## Example
+
+A reference implementation is provided with the source in the [`./example`](https://github.com/inh3/nPool/tree/master/example) folder.
 
 ## API Documentation
 
