@@ -17,7 +17,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
 * [The Implementation](#the-implementation)
 * [Installation](#installation)
-* [Building From Source](#buiding-from-source)
+* [Building From Source](#building-from-source)
 * [Example](#example)
 * [API Documentation](#api-documentation)
 * [Future Development](#future-development)
