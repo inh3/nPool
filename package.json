@@ -2,9 +2,9 @@
   "preferGlobal": false,
 
   "name": "npool",
-  "version": "1.0.3",
+  "version": "1.0.4",
 
-  "description": "A platform independent thread pool add-on for Node.js",
+  "description": "A cross-platform thread pool add-on for Node.js",
   "keywords": [
     "c",
     "c++",
