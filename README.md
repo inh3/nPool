@@ -34,6 +34,8 @@ One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container
 
 `npm install npool`
 
+[![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool)
+
 ## Building From Source
 
 nPool can be easily compiled on Mac, Linux and Windows using [`node-gyp`](https://github.com/TooTallNate/node-gyp).
@@ -287,7 +289,6 @@ nPool.queueWork(unitOfWork);
 
 1. Multiple thread pools per Node.js process
 2. Comprehensive error and exception handling
-3. Unit tests
 
 ## License
 
