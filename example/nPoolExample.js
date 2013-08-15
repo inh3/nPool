@@ -35,6 +35,10 @@ var helloWorldCallbackFunction = function (callbackObject, workId) {
     console.log("Callback Object:");
     console.log(callbackObject);
     console.log("");
+
+    console.log("Extra Module:");
+    console.log(callbackObject.nRequireModule);
+    console.log("");
 }
 
 // object type to be used to demonstrate context param within unit of work

@@ -14,6 +14,9 @@ using namespace v8;
 #include "json.h"
 #include "utilities.h"
 #include "callback_queue.h"
+#include "nrequire.h"
+
+#define NREQUIRE_NAME "nRequire"
 
 // file loader and hash (npool.cc)
 static FileManager *fileManager = &(FileManager::GetInstance());
@@ -77,6 +80,18 @@ void Thread::ThreadPostInit(void* threadContext)
 
         // store reference to persistent context
         thisContext->threadJSContext = persistentContext;
+
+        // enter thread specific context
+        Context::Scope context_scope(thisContext->threadJSContext);
+
+        // get handle to nRequire function
+        Local<FunctionTemplate> functionTemplate = FunctionTemplate::New(Require::RequireFunction);
+        Local<Function> nRequireFunction = functionTemplate->GetFunction();
+        nRequireFunction->SetName(String::NewSymbol(NREQUIRE_NAME));
+
+        // attach function to context
+        Handle<Object> globalContext = thisContext->threadJSContext->Global();
+        globalContext->Set(String::New(NREQUIRE_NAME), nRequireFunction);
     }
 
     // leave the isolate
