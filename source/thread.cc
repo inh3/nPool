@@ -23,15 +23,21 @@ static CallbackQueue *callbackQueue = &(CallbackQueue::GetInstance());
 
 typedef struct THREAD_CONTEXT_STRUCT
 {
-  uv_async_t*       uvAsync;
-  Isolate*          threadIsolate;
-  ThreadModuleMap*  moduleMap;
+    // libuv
+    uv_async_t*         uvAsync;
+
+    // v8
+    Isolate*            threadIsolate;
+    Persistent<Context> threadJSContext;
+
+    // thread context
+    ThreadModuleMap*    moduleMap;
 } THREAD_CONTEXT;
 
 void* Thread::ThreadInit()
 {
     // allocate memory for thread context
-    THREAD_CONTEXT* threadContext= (THREAD_CONTEXT*)malloc(sizeof(THREAD_CONTEXT));
+    THREAD_CONTEXT* threadContext = (THREAD_CONTEXT*)malloc(sizeof(THREAD_CONTEXT));
     memset(threadContext, 0, sizeof(THREAD_CONTEXT));
 
     // create and initialize async watcher
@@ -49,10 +55,41 @@ void* Thread::ThreadInit()
     return (void*)threadContext;
 }
 
+void Thread::ThreadPostInit(void* threadContext)
+{
+    // thread context
+    THREAD_CONTEXT* thisContext = (THREAD_CONTEXT*)threadContext;
+
+    // get reference to thread isolate
+    Isolate* isolate = thisContext->threadIsolate;
+    {
+        // lock the isolate
+        Locker myLocker(isolate);
+
+        // enter the isolate
+        isolate->Enter();
+
+        // create a stack-allocated handle-scope
+        HandleScope handle_scope;
+
+        // create a persistent context for the javascript in this thread
+        Persistent<Context> persistentContext(Context::New());
+
+        // store reference to persistent context
+        thisContext->threadJSContext = persistentContext;
+    }
+
+    // leave the isolate
+    isolate->Exit();
+}
+
 void Thread::ThreadDestroy(void* threadContext)
 {
     // thread context
     THREAD_CONTEXT* thisContext = (THREAD_CONTEXT*)threadContext;
+
+    // dispose of js context
+    thisContext->threadJSContext.Dispose();
 
     // Dispose of the isolate
     ((Isolate *)(thisContext->threadIsolate))->Dispose();
@@ -174,11 +211,8 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         // Create a stack-allocated handle scope.
         HandleScope handle_scope;
 
-        // Create a new context.
-        Handle<Context> context = Context::New();
-
-        // Enter the created context
-        Context::Scope context_scope(context);
+        // enter thread specific context
+        Context::Scope context_scope(thisContext->threadJSContext);
 
         // get the module string if necessary
         Handle<Object> workerObject;

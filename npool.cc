@@ -92,7 +92,7 @@ Handle<Value> CreateThreadPool(const Arguments& args)
 
     // create task queue and thread pool
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
-    threadPool = CreateThreadPool(numThreads, taskQueue, Thread::ThreadInit, Thread::ThreadDestroy);
+    threadPool = CreateThreadPool(numThreads, taskQueue, Thread::ThreadInit, Thread::ThreadPostInit, Thread::ThreadDestroy);
 
     return scope.Close(Undefined());
 }
