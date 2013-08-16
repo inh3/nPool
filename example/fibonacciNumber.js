@@ -14,5 +14,5 @@ var FibModule = function () {
     };
 };
 
-// make this available to the calling context
-this.FibModule = FibModule;
+// replicate node.js module loading system
+module.exports = FibModule;

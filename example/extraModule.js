@@ -13,4 +13,4 @@ var ExtraModule = function () {
 };
 
 // make this available to the calling context
-this.ExtraModule = ExtraModule;
+module.exports = ExtraModule;

@@ -9,6 +9,8 @@ using namespace v8;
 // threadpool
 #include "synchronize.h"
 
+#define REQUIRE_FUNCTION_NAME "require"
+
 class Require
 {
     public:

@@ -16,8 +16,6 @@ using namespace v8;
 #include "callback_queue.h"
 #include "nrequire.h"
 
-#define NREQUIRE_NAME "nRequire"
-
 // file loader and hash (npool.cc)
 static FileManager *fileManager = &(FileManager::GetInstance());
 
@@ -86,12 +84,20 @@ void Thread::ThreadPostInit(void* threadContext)
 
         // get handle to nRequire function
         Local<FunctionTemplate> functionTemplate = FunctionTemplate::New(Require::RequireFunction);
-        Local<Function> nRequireFunction = functionTemplate->GetFunction();
-        nRequireFunction->SetName(String::NewSymbol(NREQUIRE_NAME));
+        Local<Function> requireFunction = functionTemplate->GetFunction();
+        requireFunction->SetName(String::NewSymbol(REQUIRE_FUNCTION_NAME));
 
         // attach function to context
         Handle<Object> globalContext = thisContext->threadJSContext->Global();
-        globalContext->Set(String::New(NREQUIRE_NAME), nRequireFunction);
+        globalContext->Set(String::New(REQUIRE_FUNCTION_NAME), requireFunction);
+
+        // setup the module and exports objects
+        Local<Object> module = Object::New();
+        module->Set(String::New("exports"), Object::New());
+
+        // attach to the context
+        globalContext->Set(String::New("module"), module);
+        globalContext->Set(String::New("exports"), Handle<Object>::Cast(module->Get(String::New("exports"))));
     }
 
     // leave the isolate

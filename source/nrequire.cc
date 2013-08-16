@@ -51,15 +51,20 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 	// Create a string containing the JavaScript source code.
 	Handle<String> source = String::New(fileBuffer);
 
-	// Compile the source code.
+	// compile the source code.
 	Handle<Script> script = Script::Compile(source);
 
-	// Run the script to get the result.
-	Handle<Value> scriptResult = script->Run();
+	// execute the script
+	script->Run();
 
 	// free file buffer and close file ref
 	fclose(requireFile);
 	free(fileBuffer);
 
-	return scope.Close(scriptResult);
+	// get reference to global context
+  	Handle<Object> globalContext = Context::GetCurrent()->Global();
+  	Handle<Object> module = Handle<Object>::Cast(globalContext->Get(String::New("module")));
+
+	// return the exports similar to node.js
+	return scope.Close(module->Get(String::New("exports")));
 }
