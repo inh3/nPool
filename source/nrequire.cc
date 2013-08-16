@@ -55,7 +55,9 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 	Handle<Script> script = Script::Compile(source);
 
 	// execute the script
+	//printf("[%u] *** START - FILE BEING RUN!: %s\n", SyncGetThreadId(), *fileName);
 	script->Run();
+	//printf("[%u] *** END - FILE WAS RUN!: %s\n", SyncGetThreadId(), *fileName);
 
 	// free file buffer and close file ref
 	fclose(requireFile);

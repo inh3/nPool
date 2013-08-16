@@ -1,3 +1,5 @@
+var ExtraModule = require('./extraModule.js');
+
 // object type function prototype
 var HelloWorld = function () {
 
@@ -10,7 +12,8 @@ var HelloWorld = function () {
     this.getHelloWorld = function (workParam) {
         return { 
         	helloWorld: sayHelloWorld(workParam),
-        	utf8OutputString: "Τη γλώσσα μου έδωσαν ελληνική]" + workParam.utf8InputString
+        	utf8OutputString: "Τη γλώσσα μου έδωσαν ελληνική]" + workParam.utf8InputString,
+                extraModule: (new ExtraModule()).toString()
         };
     };
 };
