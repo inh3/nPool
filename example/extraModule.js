@@ -5,7 +5,7 @@ var _ = require('./underscore.js');
 var ExtraModule = function () {
 
     // function that matches the unit of work defined work function
-    this.getExtra = function () {
+    this.getExtra = function (workParam) {
         return "** EXTRA - Nested Module Loading **";
     };
 

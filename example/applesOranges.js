@@ -3,9 +3,6 @@ var _ = require('./underscore.js');
 
 var ApplesOranges = function() {
 
-    // total number of fruits
-    this.fruitCount = 0;
-
     // function that matches the unit of work defined work function
     this.getFruitNames = function (workParam) {
 
