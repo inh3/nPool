@@ -2,7 +2,8 @@
   "preferGlobal": false,
 
   "name": "npool",
-  "version": "1.0.4",
+  "version": "1.0.6",
+  "main": "./build/Release/npool.node",
 
   "description": "A cross-platform thread pool add-on for Node.js",
   "keywords": [
