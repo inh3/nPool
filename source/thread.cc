@@ -109,8 +109,21 @@ void Thread::ThreadDestroy(void* threadContext)
     // thread context
     THREAD_CONTEXT* thisContext = (THREAD_CONTEXT*)threadContext;
 
-    // dispose of js context
-    thisContext->threadJSContext.Dispose();
+    // get reference to thread isolate
+    Isolate* isolate = thisContext->threadIsolate;
+    {
+        // lock the isolate
+        Locker myLocker(isolate);
+
+        // enter the isolate
+        isolate->Enter();
+
+        // dispose of js context
+        thisContext->threadJSContext.Dispose();
+    }
+
+    // exit the isolate
+    isolate->Exit();
 
     // Dispose of the isolate
     ((Isolate *)(thisContext->threadIsolate))->Dispose();
