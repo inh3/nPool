@@ -37,6 +37,24 @@ var helloWorldCallbackFunction = function (callbackObject, workId) {
     console.log("");
 }
 
+// work complete callback from thread pool 
+var applesOrangesCallbackFunction = function (callbackObject, workId) {
+
+    console.log("----------------------------------------");
+
+    console.log("Callback Function: Apples Oranges\n");
+
+    console.log("Callback Context:");
+    console.log(this);
+    console.log("");
+
+    console.log("WorkId: " + workId + "\n");
+
+    console.log("Callback Object:");
+    console.log(callbackObject);
+    console.log("");
+}
+
 // object type to be used to demonstrate context param within unit of work
 function ContextA() {
 
@@ -51,9 +69,17 @@ function ContextB() {
     this.contextBFunction = function() { console.log("[Context B] Function"); }
 }
 
+// object type to be used to demonstrate context param within unit of work
+function ContextC() {
+
+    this.contextCProperty = "[Context C] Property",
+    this.contextCFunction = function() { console.log("[Context C] Function"); }
+}
+
 // load files defining object types
 nPool.loadFile(1, './fibonacciNumber.js');
 nPool.loadFile(2, './helloWorld.js');
+nPool.loadFile(3, './applesOranges.js');
 
 // create thread pool with two threads
 nPool.createThreadPool(2);
@@ -61,6 +87,7 @@ nPool.createThreadPool(2);
 // object instances to demonstrate context param
 var ContextAObject = new ContextA();
 var ContextBObject = new ContextB();
+var ContextCObject = new ContextC();
 
 // set continous timeout on main thread every 250ms
 var startTime = (new Date()).getTime();
@@ -72,7 +99,7 @@ var startTime = (new Date()).getTime();
 })();
 
 // add 6 units of work to thread pool queue
-for(var workCount = 0; workCount < 6; workCount++) {
+for(var workCount = 0; workCount < 7; workCount++) {
 
     // create the unit of work object
     var unitOfWork = {
@@ -99,6 +126,21 @@ for(var workCount = 0; workCount < 6; workCount++) {
 
         unitOfWork.callbackFunction = helloWorldCallbackFunction;
         unitOfWork.callbackContext = ContextBObject
+
+    }
+
+    // this utilizes the node.js like module loading system
+    // for pure javascript modules
+    if(workCount == 6) {
+        unitOfWork.workId = 1234;
+        unitOfWork.fileKey = 3;
+        unitOfWork.workFunction = "getFruitNames";
+        unitOfWork.workParam = {
+            fruitArray: [ { name: "apple", color: "red"}, { name: "strawberry", color: "red" }, { name: "banana", color: "yellow" } ]
+        };
+
+        unitOfWork.callbackFunction = applesOrangesCallbackFunction;
+        unitOfWork.callbackContext = ContextCObject
 
     }
 

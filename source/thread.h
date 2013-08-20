@@ -43,6 +43,7 @@ class Thread
     public:
         
         static void*                ThreadInit();
+        static void                 ThreadPostInit(void* threadContext);
         static void                 ThreadDestroy(void* threadContext);
 
         static THREAD_WORK_ITEM*    BuildWorkItem(Handle<Object> v8Object);
