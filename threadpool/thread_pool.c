@@ -40,6 +40,9 @@ typedef struct THREAD_DATA_STRUCT
     // reference to initialize method
     void*                   (*initialize)();
 
+    // reference to post-init method
+    void                    (*postInit)(void *context);
+
     // reference to destroy method
     void                    (*destroy)(void* context);
 
@@ -94,6 +97,13 @@ static THREAD_FUNC WINAPI threadFunction(void *threadArg)
     // store thread context data locally and update thread id
     THREAD_DATA *threadData = (THREAD_DATA*)threadArg;
     threadData->taskQueueWorkData->threadId = SyncGetThreadId();
+
+    // execute post initialize if set
+    if(threadData->postInit != NULL)
+    {
+        //fprintf(stdout, "[%u] threadFunction - postInit\n", SyncGetThreadId());
+        threadData->postInit(threadData->context);
+    }
 
     // continue until termination signaled
     while(!*(threadData->terminateThread))
@@ -162,7 +172,12 @@ static THREAD_FUNC WINAPI threadFunction(void *threadArg)
 /* FUNCTION DEFINITIONS */
 /*---------------------------------------------------------------------------*/
 
-THREAD_POOL_DATA* CreateThreadPool(unsigned int numThreads, TASK_QUEUE_DATA *taskQueueData, void* (*threadInit)(void), void (*threadDestory)(void* threadContext))
+THREAD_POOL_DATA* CreateThreadPool(
+    unsigned int numThreads,
+    TASK_QUEUE_DATA *taskQueueData,
+    void* (*threadInit)(void),
+    void (*threadPostInit)(void* threadContext),
+    void (*threadDestory)(void* threadContext))
 {
     // loop variable
     unsigned int i = 0;
@@ -204,6 +219,10 @@ THREAD_POOL_DATA* CreateThreadPool(unsigned int numThreads, TASK_QUEUE_DATA *tas
         {
             threadData->initialize = threadInit;
             threadData->context = threadData->initialize();
+        }
+        if(threadPostInit != NULL)
+        {
+            threadData->postInit = threadPostInit;
         }
         if(threadDestory != NULL)
         {

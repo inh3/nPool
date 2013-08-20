@@ -10,7 +10,8 @@
             './source/file_manager.cc',
             './source/json.cc',
             './source/callback_queue.cc',
-            './source/utilities.cc'
+            './source/utilities.cc',
+            './source/nrequire.cc'
         ],
 
         'include_dirs': [

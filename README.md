@@ -8,7 +8,8 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
  * Linux, Mac and Windows support
  * Efficient and straightforward interface
- * Transparent marshalling of javascript objects in and out of the thread pool
+ * Emulated Node.js module loading system within threads
+ * Transparent marshalling of Javascript objects in and out of the thread pool
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
  * Support for UTF-8 strings
@@ -20,6 +21,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 * [Building From Source](#building-from-source)
 * [Example](#example)
 * [API Documentation](#api-documentation)
+* [Thread Module Support] (#thread-module-support)
 * [Future Development](#future-development)
 * [License](#license)
 
@@ -178,29 +180,38 @@ Files that are loaded should define an object type (function) that can be instan
 An example file is given below:
 
 ```js
-// ./objectType.js
+// ./applesOranges.js
 
-// object type function prototype
-var ObjectType = function () {
+// utilize a node.js like require
+var _ = require('./underscore.js');
 
-	// private function
-    function privateFunction(workParam) {
-        return "I am a private function";
-    };
+var ApplesOranges = function() {
 
     // function that matches the unit of work defined work function
-    this.objectMethod = function (workParam) {
-        var callbackObject = {
-            "objectProperty": privateFunction(workParam)
+    this.getFruitNames = function (workParam) {
+
+        // total number of fruits
+        var fruitCount = 0;
+
+        // count number of fruits
+        _.each(workParam.fruitArray, function(element) {
+            fruitCount++;
+        });
+
+        // return callback object
+        return { 
+            // return passed in parameter
+            origFruitArray: workParam.fruitArray,
+
+            // using underscore.js
+            fruitNames: _.pluck(workParam.fruitArray, "name"),
+            fruitCount: fruitCount
         };
-
-        // return a single object
-        return callbackObject;
     };
-};
+}
 
-// make this available to the calling context
-this.ObjectType = ObjectType;
+// replicate Node.js module loading behavior
+module.exports = ApplesOranges;
 ```
 
 ---
@@ -289,6 +300,21 @@ var unitOfWork = {
 // queue the unit of work
 nPool.queueWork(unitOfWork);
 ```
+
+## Thread Module Support
+
+nPool emulates the Node.js module system for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
+
+The emulated module loading system has the following features/limitations:
+
+* Similar 'require(...)' syntax as Node.js
+ * Relative path and full file-name must be specified
+* Limited to pure Javascript modules
+ * No native or compiled add-ons
+* Supports nested modules
+ * Required module requiring other modules
+
+The reference implementation provided with the source ([`./example`](https://github.com/inh3/nPool/tree/master/example)) demonstrates the emulated module loading mechanism.
 
 ## Future Development
 
