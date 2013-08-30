@@ -21,7 +21,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 * [Building From Source](#building-from-source)
 * [Example](#example)
 * [API Documentation](#api-documentation)
-* [Thread Module Support] (#thread-module-support)
+* [Thread Module Support](#thread-module-support)
 * [Future Development](#future-development)
 * [License](#license)
 
@@ -49,7 +49,7 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.10.* or later
+* Node.js 0.10.*
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11
