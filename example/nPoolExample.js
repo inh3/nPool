@@ -1,5 +1,11 @@
-// load nPool module
-var nPool = require('./../build/Release/npool');
+// load appropriate npool module
+try {
+    var nPool = require('./../build/Release/npool');
+}
+catch (e) {
+    var nPool = require('./../build/Debug/npool');
+}
+
 
 // work complete callback from thread pool 
 var fibonacciCallbackFunction = function (callbackObject, workId) {
@@ -91,11 +97,19 @@ var ContextCObject = new ContextC();
 
 // set continous timeout on main thread every 250ms
 var startTime = (new Date()).getTime();
+var count = 0;
 (function spinForever () {
     var diffTime = (new Date()).getTime() - startTime;
     console.log("** Time since last timeout: " + diffTime + " ms");
     startTime = (new Date()).getTime();
-    setTimeout(spinForever, 250);
+
+    // continue for ~25 seconds
+    if(count++ < 100) {
+        setTimeout(spinForever, 250);
+    }
+    else {
+        nPool.destroyThreadPool();
+    }
 })();
 
 // add 6 units of work to thread pool queue

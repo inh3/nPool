@@ -86,7 +86,7 @@ extern int                 GetQueueLength(TASK_QUEUE_DATA *taskQueueData);
 /*---------------------------------------------------------------------------*/
 
 // individual thread function
-static THREAD_FUNC WINAPI threadFunction(void *threadArg)
+static THREAD_FUNC threadFunction(void *threadArg)
 {
     // task item function return data reference
     void* taskData = 0;
@@ -164,6 +164,11 @@ static THREAD_FUNC WINAPI threadFunction(void *threadArg)
     // free up thread data
     free(threadData->taskQueueWorkData);
     free(threadData);
+
+#ifdef _WIN32
+    // http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.110).aspx
+    _endthreadex(0);
+#endif
 
     return THREAD_FUNC_RETURN;
 }

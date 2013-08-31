@@ -47,6 +47,27 @@ var httpFunc = function f (req, res) {
     }
 };
 
-var port = process.argv[2] || 1234;
+var cluster = require('cluster');
 var http = require('http');
-http.createServer(httpFunc).listen(port);
+var numCPUs = require('os').cpus().length;
+
+if (cluster.isMaster) {
+
+    console.log("[ Master ]");
+
+    // Fork workers.
+    for (var i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+
+    cluster.on('exit', function(worker, code, signal) {
+        console.log('worker ' + worker.process.pid + ' died');
+    });
+} else {
+    console.log("[ Worker ]");
+    var port = process.argv[2] || 1234;
+    var http = require('http');
+    http.createServer(httpFunc).listen(port);
+    console.log('Application running! ' + port);
+}
+
