@@ -51,11 +51,15 @@ unsigned int        SyncGetThreadId()
 }
 
 // CreateThread
-int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (WINAPI *threadFunction)(void *), void *threadContext)
+int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (*threadFunction)(void *), void *threadContext)
 {
     DWORD threadId = 0;
     
-    *threadRef = CreateThread( 
+    // A thread in an executable that calls the C run-time library (CRT) 
+    // should use the _beginthreadex and _endthreadex functions
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms682453(v=vs.85).aspx
+    // http://msdn.microsoft.com/en-us/library/kdzttdcb(v=vs.110).aspx
+    *threadRef = (THREAD)_beginthreadex(
             NULL,                   // default security attributes
             0,                      // use default stack size  
             threadFunction,         // thread function name
@@ -69,7 +73,10 @@ int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD
 // WaitForSingleObject
 int                 SyncJoinThread(THREAD threadRef, void** returnValue)
 {
-    return WaitForSingleObject(threadRef, INFINITE);
+    WaitForSingleObject(threadRef, INFINITE);
+    CloseHandle(threadRef);
+
+    return 0;
 }
 
 // InitializeCriticalSection
