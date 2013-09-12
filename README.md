@@ -21,7 +21,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 * [Building From Source](#building-from-source)
 * [Example](#example)
 * [API Documentation](#api-documentation)
-* [Thread Module Support] (#thread-module-support)
+* [Thread Module Support](#thread-module-support)
 * [Future Development](#future-development)
 * [License](#license)
 
@@ -29,7 +29,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
 nPool is written entirely in C/C++.  The thread pool and synchronization frameworks are written in C and the add-on interface is written in C++.  The library has no third-party dependencies other than [Node.js](http://nodejs.org/) and [V8](https://code.google.com/p/v8/).
 
-The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Unix.  On Windows, native threads ([`CreateThread`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682453)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Task based units of work are performed via a FIFO queue that is processed by the thread pool.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via [libuv’s](http://nikhilm.github.io/uvbook/introduction.html) [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
+The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Unix.  On Windows, native threads ([`_beginthreadex`](http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Task based units of work are performed via a FIFO queue that is processed by the thread pool.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via [libuv’s](http://nikhilm.github.io/uvbook/introduction.html) [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
 
 One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container/unordered_map) are used within the add-on interface, therefore, it is necessary that the platform of choice provides [C++11](http://en.wikipedia.org/wiki/C%2B%2B11) (Windows and Linux) or [TR1](http://en.wikipedia.org/wiki/C%2B%2B_Technical_Report_1) (Apple) implementations of the standard library.
 
@@ -49,7 +49,7 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.10.* or later
+* Node.js 0.10.*
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11
