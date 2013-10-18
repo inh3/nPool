@@ -57,11 +57,11 @@ using namespace std;
 /*---------------------------------------------------------------------------*/
 
 // thread pool
-static THREAD_POOL_DATA     *threadPool = 0;
-static TASK_QUEUE_DATA      *taskQueue = 0;
+static THREAD_POOL_DATA     *threadPool     = 0;
+static TASK_QUEUE_DATA      *taskQueue      = 0;
 
 // file loader and hash
-static FileManager          *fileManager = 0;
+static FileManager          *fileManager    = 0;
 
 /*---------------------------------------------------------------------------*/
 /* STATIC FUNCTION DEFINITIONS */
@@ -84,7 +84,8 @@ Handle<Value> CreateThreadPool(const Arguments& args)
         return scope.Close(Undefined());
     }
 
-    if(taskQueue != 0)
+    // ensure thread pool has not already been created
+    if((taskQueue != 0) || (threadPool != 0))
     {
         ThrowException(Exception::TypeError(String::New("createThreadPool() - Thread pool already created")));
         return scope.Close(Undefined());
@@ -109,6 +110,13 @@ Handle<Value> DestoryThreadPool(const Arguments& args)
 
     HandleScope scope;
 
+    // ensure thread pool has already been created
+    if((threadPool == 0) || (taskQueue == 0))
+    {
+        ThrowException(Exception::TypeError(String::New("destroyThreadPool() - No thread pool exists to destroy")));
+        return scope.Close(Undefined());
+    }
+
     // destroy thread pool and task queue
     DestroyThreadPool(threadPool);
     DestroyTaskQueue(taskQueue);
@@ -129,7 +137,7 @@ Handle<Value> LoadFile(const Arguments& args)
     // validate input
     if((args.Length() != 2) || !args[0]->IsNumber() || !args[1]->IsString())
     {
-        ThrowException(Exception::TypeError(String::New("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string).")));
+        ThrowException(Exception::TypeError(String::New("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string)")));
         return scope.Close(Undefined());
     }
 
