@@ -1,9 +1,10 @@
 // load appropriate npool module
+var nPool = null;
 try {
-    var nPool = require('./../build/Release/npool');
+    nPool = require('./../build/Release/npool');
 }
 catch (e) {
-    var nPool = require('./../build/Debug/npool');
+    nPool = require('./../build/Debug/npool');
 }
 
 
@@ -23,7 +24,7 @@ var fibonacciCallbackFunction = function (callbackObject, workId) {
     console.log("Callback Object:");
     console.log(callbackObject);
     console.log("");
-}
+};
 
 // work complete callback from thread pool 
 var helloWorldCallbackFunction = function (callbackObject, workId) {
@@ -41,7 +42,7 @@ var helloWorldCallbackFunction = function (callbackObject, workId) {
     console.log("Callback Object:");
     console.log(callbackObject);
     console.log("");
-}
+};
 
 // work complete callback from thread pool 
 var applesOrangesCallbackFunction = function (callbackObject, workId) {
@@ -59,26 +60,26 @@ var applesOrangesCallbackFunction = function (callbackObject, workId) {
     console.log("Callback Object:");
     console.log(callbackObject);
     console.log("");
-}
+};
 
 // object type to be used to demonstrate context param within unit of work
 function ContextA() {
 
-    this.contextAProperty = "[Context A] Property",
+    this.contextAProperty = "[Context A] Property";
     this.contextAFunction = function() { console.log("[Context A] Function"); }
 }
 
 // object type to be used to demonstrate context param within unit of work
 function ContextB() {
 
-    this.contextBProperty = "[Context B] Property",
+    this.contextBProperty = "[Context B] Property";
     this.contextBFunction = function() { console.log("[Context B] Function"); }
 }
 
 // object type to be used to demonstrate context param within unit of work
 function ContextC() {
 
-    this.contextCProperty = "[Context C] Property",
+    this.contextCProperty = "[Context C] Property";
     this.contextCFunction = function() { console.log("[Context C] Function"); }
 }
 
@@ -126,7 +127,7 @@ for(var workCount = 0; workCount < 7; workCount++) {
 
         callbackFunction: fibonacciCallbackFunction,
         callbackContext: ContextAObject
-    }
+    };
 
     // queue some other work on a special condition
     if(workCount == 3) {
@@ -150,7 +151,20 @@ for(var workCount = 0; workCount < 7; workCount++) {
         unitOfWork.fileKey = 3;
         unitOfWork.workFunction = "getFruitNames";
         unitOfWork.workParam = {
-            fruitArray: [ { name: "apple", color: "red"}, { name: "strawberry", color: "red" }, { name: "banana", color: "yellow" } ]
+            fruitArray: [
+                {
+                    name: "apple",
+                    color: "red"
+                },
+                {
+                    name: "strawberry",
+                    color: "red"
+                },
+                {
+                    name: "banana",
+                    color: "yellow"
+                }
+            ]
         };
 
         unitOfWork.callbackFunction = applesOrangesCallbackFunction;
