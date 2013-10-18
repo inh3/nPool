@@ -148,7 +148,13 @@ Handle<Value> LoadFile(const Arguments& args)
     Local<String> v8FilePath = Local<String>::Cast(args[1]);
     String::AsciiValue filePath(v8FilePath);
 
-    fileManager->LoadFile(fileKey, *filePath);
+    // ensure file was loaded successfully
+    LOAD_FILE_STATUS fileStatus = fileManager->LoadFile(fileKey, *filePath);
+    if(fileStatus != LOAD_FILE_SUCCESS)
+    {
+        ThrowException(Exception::TypeError(String::New("loadFile() - Failed to load file. Check if file exists.")));
+        return scope.Close(Undefined());
+    }
 
     return scope.Close(Undefined());
 }

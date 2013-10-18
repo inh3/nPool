@@ -19,6 +19,20 @@ using namespace std;
 
 typedef unordered_map<uint32_t, string> FileMap;
 
+// success/fail of adding a task item to the queue
+typedef enum LOAD_FILE_STATUS_ENUM
+{
+    // file successfully loaded
+    LOAD_FILE_SUCCESS = 0,
+
+    // file has already been loaded previously
+    LOAD_FILE_EXISTS,
+
+    // file was not able to load due to failure
+    LOAD_FILE_FAIL
+
+} LOAD_FILE_STATUS;
+
 class FileManager
 {
     public:
@@ -30,7 +44,7 @@ class FileManager
         virtual             ~FileManager();
 
         // load file and add to hash
-        void                LoadFile(uint32_t fileKey, char *filePath);
+        LOAD_FILE_STATUS    LoadFile(uint32_t fileKey, char *filePath);
 
         // remove file from hash
         void                RemoveFile(uint32_t fileKey);

@@ -36,11 +36,14 @@ FileManager::~FileManager()
     SyncDestroyMutex(&(this->fileMapMutex));
 }
 
-void FileManager::LoadFile(uint32_t fileKey, char* filePath)
+LOAD_FILE_STATUS FileManager::LoadFile(uint32_t fileKey, char* filePath)
 {
     fprintf(stdout, "FileManager::LoadFile - FileKey: %u FilePath: %s\n", fileKey, filePath);
 
     SyncLockMutex(&(this->fileMapMutex));
+
+    // default to success
+    LOAD_FILE_STATUS fileStatus = LOAD_FILE_SUCCESS;
 
     // ensure this key does not already exist
     if(this->fileMap->find(fileKey) == this->fileMap->end())
@@ -51,54 +54,61 @@ void FileManager::LoadFile(uint32_t fileKey, char* filePath)
 
         // open file
         uv_fs_open(uv_default_loop(), &fs_req, filePath, O_RDONLY, 0, NULL);
-        fd = fs_req.result;
 
-        // get file size
+        // ensure file was opened correctly
         if (fs_req.result != -1)
         {
+            // get file stats
+            fd = fs_req.result;
             uv_fs_fstat(uv_default_loop(), &fs_req, fd, NULL);
+
+            // allocate buffer memory and read file
+            uint64_t fileSize = 0;
+            char *fileBuffer = 0;
+            if (fs_req.result != -1)
+            {
+                // allocate buffer size to the file size + '\0'
+                fileSize = fs_req.statbuf.st_size;
+                fileBuffer = (char *)malloc(fileSize + 1);
+                memset(fileBuffer, 0, fileSize + 1);
+
+                // read file - synchronous
+                uv_fs_read(uv_default_loop(), &fs_req, fd, fileBuffer, fileSize, -1, NULL);
+            }
+
+            // file-read successful
+            if (fs_req.result >= 0)
+            {
+                uv_fs_close(uv_default_loop(), &fs_req, fd, NULL);
+            }
+
+            // store file string to file map
+            this->fileMap->insert(make_pair(fileKey, fileBuffer));
+            //fprintf(stdout, "FileManager::LoadFile - File loaded: %s\n", filePath);
+
+            // de-allocate file buffer memory
+            free(fileBuffer);
         }
         else
         {
             fprintf(stderr, "FileManager::LoadFile - Error opening file: %d\n", fs_req.errorno);
+            fileStatus = LOAD_FILE_FAIL;
         }
 
-        // allocate buffer memory and read file
-        uint64_t fileSize = 0;
-        char *fileBuffer = 0;
-        if (fs_req.result != -1)
-        {
-            // allocate buffer size to the file size + '\0'
-            fileSize = fs_req.statbuf.st_size;
-            fileBuffer = (char *)malloc(fileSize + 1);
-            memset(fileBuffer, 0, fileSize + 1);
-
-            // read file - synchronous
-            uv_fs_read(uv_default_loop(), &fs_req, fd, fileBuffer, fileSize, -1, NULL);
-        }
-
-        // file-read successful
-        if (fs_req.result >= 0)
-        {
-            uv_fs_close(uv_default_loop(), &fs_req, fd, NULL);
-        }
 
         // cleanup uv file system handle
         uv_fs_req_cleanup(&fs_req);
-
-        // store file string to file map
-        this->fileMap->insert(make_pair(fileKey, fileBuffer));
-        //fprintf(stdout, "FileManager::LoadFile - File loaded: %s\n", filePath);
-
-        // de-allocate file buffer memory
-        free(fileBuffer);
     }
     else
     {
         fprintf(stderr, "FileManager::LoadFile - File key already exists: %u\n", fileKey);
+        fileStatus = LOAD_FILE_EXISTS;
     }
 
     SyncUnlockMutex(&(this->fileMapMutex));
+
+    // return load status
+    return fileStatus;
 }
 
 void FileManager::RemoveFile(uint32_t fileKey)
