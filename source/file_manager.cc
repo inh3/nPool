@@ -134,7 +134,7 @@ const string* FileManager::GetFileString(uint32_t fileKey)
 
     SyncLockMutex(&(this->fileMapMutex));
 
-    // ensure this key does not already exist
+    // ensure this key does exist
     if(this->fileMap->find(fileKey) != this->fileMap->end())
     {
         fileString = &((this->fileMap->find(fileKey))->second);

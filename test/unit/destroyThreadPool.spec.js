@@ -6,10 +6,9 @@ catch (e) {
     var nPool = require(__dirname + '/../../build/Debug/npool');
 }
 
-describe("[ destroyThreadPool() - Unit Tests ]", function() {
-  it("Test Suite Ready", function() {
-    var health = true;
-    expect(health).toBe(true);
+describe("[ createThreadPool() - Unit Tests ]", function() {
+  it("OK", function() {
+    expect(nPool).not.toBe(undefined);
   });
 });
 

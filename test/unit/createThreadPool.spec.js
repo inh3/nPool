@@ -7,9 +7,8 @@ catch (e) {
 }
 
 describe("[ createThreadPool() - Unit Tests ]", function() {
-  it("Test Suite Ready", function() {
-    var health = true;
-    expect(health).toBe(true);
+  it("OK", function() {
+    expect(nPool).not.toBe(undefined);
   });
 });
 
