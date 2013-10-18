@@ -2,8 +2,10 @@
 var HelloWorld = function () {
 
     // private function
-    function sayHelloWorld(workParam) {
-        return "Hello World " + workParam.testString;
+    this.sayHelloWorld = function (workParam) {
+        return {
+            resultString: "Hello World " + workParam.testString
+        };
     };
 };
 
