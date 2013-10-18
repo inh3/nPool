@@ -29,6 +29,43 @@ describe("createThreadPool() shall execute without throwing an exception when pa
   });
 });
 
+describe("createThreadPool() shall execute without throwing an exception when called after a previous thread pool has been destroyed.", function() {
+  it("Executed without an exception.", function() {
+
+    nPool.createThreadPool(2);
+    nPool.destroyThreadPool();
+
+    var thrownException = null;
+    try {
+        nPool.createThreadPool(2);
+    }
+    catch(exception) {
+        thrownException = exception;
+    }
+    nPool.destroyThreadPool();
+    
+    expect(thrownException).toBe(null);
+  });
+});
+
+describe("createThreadPool() shall throw an exception when called more than once.", function() {
+  it("Exception thrown when called twice.", function() {
+
+    nPool.createThreadPool(2);
+    
+    var thrownException = null;
+    try {
+        nPool.createThreadPool(2);
+    }
+    catch(exception) {
+        thrownException = exception;
+    }
+    nPool.destroyThreadPool();
+
+    expect(thrownException).not.toBe(null);
+  });
+});
+
 describe("createThreadPool() shall throw an exception when passed zero arguments.", function() {
   it("Exception thrown with zero parameters.", function() {
 

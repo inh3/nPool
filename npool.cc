@@ -57,11 +57,11 @@ using namespace std;
 /*---------------------------------------------------------------------------*/
 
 // thread pool
-static THREAD_POOL_DATA     *threadPool;
-static TASK_QUEUE_DATA      *taskQueue;
+static THREAD_POOL_DATA     *threadPool = 0;
+static TASK_QUEUE_DATA      *taskQueue = 0;
 
 // file loader and hash
-static FileManager          *fileManager;
+static FileManager          *fileManager = 0;
 
 /*---------------------------------------------------------------------------*/
 /* STATIC FUNCTION DEFINITIONS */
@@ -80,7 +80,13 @@ Handle<Value> CreateThreadPool(const Arguments& args)
     // validate input
     if((args.Length() != 1) || !args[0]->IsNumber())
     {
-        ThrowException(Exception::TypeError(String::New("CreateThreadPool() - Expects 1 arguments: 1) number of threads (uint32)")));
+        ThrowException(Exception::TypeError(String::New("createThreadPool() - Expects 1 arguments: 1) number of threads (uint32)")));
+        return scope.Close(Undefined());
+    }
+
+    if(taskQueue != 0)
+    {
+        ThrowException(Exception::TypeError(String::New("createThreadPool() - Thread pool already created")));
         return scope.Close(Undefined());
     }
 
@@ -101,11 +107,16 @@ Handle<Value> DestoryThreadPool(const Arguments& args)
 {
     fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
 
+    HandleScope scope;
+
     // destroy thread pool and task queue
     DestroyThreadPool(threadPool);
     DestroyTaskQueue(taskQueue);
 
-    HandleScope scope;
+    // reset the references because they are no longer valid
+    threadPool = 0;
+    taskQueue = 0;
+
     return scope.Close(Undefined());
 }
 
