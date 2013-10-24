@@ -31,8 +31,9 @@ typedef struct THREAD_CONTEXT_STRUCT
     Isolate*            threadIsolate;
     Persistent<Context> threadJSContext;
 
-    // thread context
+    // thread module cache
     ThreadModuleMap*    moduleMap;
+
 } THREAD_CONTEXT;
 
 void* Thread::ThreadInit()
@@ -184,6 +185,10 @@ THREAD_WORK_ITEM* Thread::BuildWorkItem(Handle<Object> v8Object)
     propertyName = String::New("callbackFunction");
     workItem->callbackFunction = Persistent<Function>::New(Handle<Function>::Cast(v8Object->Get(propertyName)));
 
+    // register external memory
+    int bytesAlloc = strlen(workItem->workParam) + strlen(workItem->workFunction);
+    V8::AdjustAmountOfExternalAllocatedMemory(bytesAlloc);
+
     return workItem;
 }
 
@@ -283,6 +288,9 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         // strinigfy callback object
         char* stringify = JSON::Stringify(workResult->ToObject());
         workItem->callbackObject = stringify;
+
+        // register external memory
+        V8::AdjustAmountOfExternalAllocatedMemory(strlen(workItem->callbackObject));
     }
 
     // leave the isolate
@@ -355,5 +363,14 @@ void Thread::uvAsyncCallback(uv_async_t* handle, int status)
         free(workItem->workParam);
         free(workItem->callbackObject);
         free(workItem);
+
+        // de-register memory
+        int bytesFree = strlen(workItem->workParam) + strlen(workItem->workFunction) + strlen(workItem->callbackObject);
+        V8::AdjustAmountOfExternalAllocatedMemory(-bytesFree);
+    }
+
+    // wait for gc to do its business (250/1000 "work")
+    while(!V8::IdleNotification(250)) {
+        fprintf(stdout, "[%u] Thread::uvAsyncCallback - Notifying Idle...\n", SyncGetThreadId());
     }
 }
