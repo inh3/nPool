@@ -379,14 +379,15 @@ void Thread::uvAsyncCallback(uv_async_t* handle, int status)
         callbackFunction.Dispose();
         callbackFunction.Clear();
 
+        // de-register memory
+        int bytesFree = strlen(workItem->workParam) + strlen(workItem->workFunction) + strlen(workItem->callbackObject);
+        V8::AdjustAmountOfExternalAllocatedMemory(-bytesFree);
+
+        // un-alloc the memory
         free(workItem->workFunction);
         free(workItem->workParam);
         free(workItem->callbackObject);
         free(workItem);
-
-        // de-register memory
-        int bytesFree = strlen(workItem->workParam) + strlen(workItem->workFunction) + strlen(workItem->callbackObject);
-        V8::AdjustAmountOfExternalAllocatedMemory(-bytesFree);
     }
 
     // wait for gc to do its business (250/1000 "work")
