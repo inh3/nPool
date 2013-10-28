@@ -391,6 +391,6 @@ void Thread::uvAsyncCallback(uv_async_t* handle, int status)
 
     // wait for gc to do its business (250/1000 "work")
     while(!V8::IdleNotification(250)) {
-        fprintf(stdout, "[%u] Thread::uvAsyncCallback - Notifying Idle...\n", SyncGetThreadId());
+        //fprintf(stdout, "[%u] Thread::uvAsyncCallback - Notifying Idle...\n", SyncGetThreadId());
     }
 }
