@@ -255,24 +255,39 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
 
         // get the module string if necessary
         Handle<Object> workerObject;
+        TryCatch tryCatch;
         if(workFile != 0)
         {
             // compile the source code
             Handle<Script> script = Script::Compile(String::New(workFile->c_str()));
+
+            // throw exception if script failed to compile
+            if(script.IsEmpty() || tryCatch.HasCaught())
+            {
+                Utilities::HandleException(&tryCatch, true);
+                return 0;
+            }
     
             // run the script to get the result
             Handle<Value> scriptResult = script->Run();
 
-            // construct the worker object from constructor
+            // throw exception if script failed to run properly
+            if(scriptResult.IsEmpty() || tryCatch.HasCaught())
+            {
+                Utilities::HandleException(&tryCatch, true);
+                return 0;
+            }
+
+            // get the handle to constructor function of worker object type
             Handle<Function> constructorFunction = Handle<Function>::Cast(scriptResult);
             workerObject = constructorFunction->NewInstance();
 
-            // cache the persistent object for later use
+            // cache the persistent object type for later use
             thisContext->moduleMap->insert(make_pair(workItem->fileKey, Persistent<Object>::New(workerObject)));
         }
         else
         {
-            // get the module from cache
+            // get the constructor function from cache
             workerObject = thisContext->moduleMap->find(workItem->fileKey)->second;
         }
 
@@ -284,6 +299,11 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
 
         // execute function and get work result
         Handle<Value> workResult = Handle<Function>::Cast(workerFunction)->Call(workerObject, 1, &workParam);
+        if(workResult.IsEmpty())
+        {
+            Utilities::HandleException(&tryCatch, true);
+            return 0;
+        }
 
         // strinigfy callback object
         char* stringify = JSON::Stringify(workResult->ToObject());

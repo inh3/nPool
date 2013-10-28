@@ -124,7 +124,7 @@ function md5 (str) {
     S43 = 15,
     S44 = 21;
 
-  str = this.utf8_encode(str);
+  str = utf8_encode(str);
   x = convertToWordArray(str);
   a = 0x67452301;
   b = 0xEFCDAB89;

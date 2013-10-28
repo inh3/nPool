@@ -10,15 +10,23 @@ class Utilities
 {
     public:
         
-        // char* utilities
+        // create a standard ascii char*
         static char*        CreateCharBuffer(Handle<String> v8String);
 
-        // Extracts a C string from a V8 Utf8Value.
+        // create a utf8 char*
         static const char*  ToCString(const String::Utf8Value& value);
 
-        // object traversal
-        static void         ParseObject(Handle<Object> v8Object);
-        static void         ParseArray(Handle<Array> v8Array);
+        // read file contents to char buffer
+        static const char*  ReadFile(const char* fileName, int* fileSize);
+
+        // clone specific properties of an object
+        static void         CloneObject(Handle<Object> sourceObject, Handle<Object> cloneObject);
+
+        // exception handler
+        static void         HandleException(TryCatch* tryCatch, bool throwException);
+
+        // print object properties
+        static void         PrintObjectProperties(Handle<Object> objectHandle);
 };
 
 #endif /* _UTILITIES_H_ */
