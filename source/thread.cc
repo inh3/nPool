@@ -14,7 +14,7 @@ using namespace v8;
 #include "json.h"
 #include "utilities.h"
 #include "callback_queue.h"
-#include "nrequire.h"
+#include "isolate_context.h"
 
 // file loader and hash (npool.cc)
 static FileManager *fileManager = &(FileManager::GetInstance());
@@ -83,22 +83,12 @@ void Thread::ThreadPostInit(void* threadContext)
         // enter thread specific context
         Context::Scope context_scope(thisContext->threadJSContext);
 
-        // get handle to nRequire function
-        Local<FunctionTemplate> functionTemplate = FunctionTemplate::New(Require::RequireFunction);
-        Local<Function> requireFunction = functionTemplate->GetFunction();
-        requireFunction->SetName(String::NewSymbol(REQUIRE_FUNCTION_NAME));
-
-        // attach function to context
+        // create global context
         Handle<Object> globalContext = thisContext->threadJSContext->Global();
-        globalContext->Set(String::New(REQUIRE_FUNCTION_NAME), requireFunction);
+        IsolateContext::CreateGlobalContext(globalContext);
 
-        // setup the module and exports objects
-        Local<Object> module = Object::New();
-        module->Set(String::New("exports"), Object::New());
-
-        // attach to the context
-        globalContext->Set(String::New("module"), module);
-        globalContext->Set(String::New("exports"), Handle<Object>::Cast(module->Get(String::New("exports"))));
+        // create module context
+        IsolateContext::CreateModuleContext(globalContext);
     }
 
     // leave the isolate

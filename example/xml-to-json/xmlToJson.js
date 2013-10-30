@@ -51,7 +51,7 @@ var count = 0;
 function workCallback(parsedObject, workId) {
     // time spent queueing work
     var totalTime = (new Date()).getTime() - startTime;
-    console.log("[ " + this.serviceName + " ] Work Queued (" + totalTime + ")");
+    console.log("[ Work Completed - " + totalTime + " ms ]");
 
     console.log('workCallback: ' + workId);
     console.log(parsedObject);

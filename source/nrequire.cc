@@ -16,6 +16,7 @@
 
 // Custom
 #include "utilities.h"
+#include "isolate_context.h"
 
 Handle<Value> Require::RequireFunction(const Arguments& args)
 {
@@ -62,16 +63,13 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
         Context::Scope moduleScope(moduleContext);
 
         // clone the calling context properties into this context
-        Utilities::CloneObject(globalContext->Global(), moduleContext->Global());
+        IsolateContext::CloneGlobalContextObject(globalContext->Global(), moduleContext->Global());
 
         // get reference to current context's object
         Handle<Object> contextObject = moduleContext->Global();
 
-        // create the module/exports within context
-        Handle<Object> moduleObject = Object::New();
-        moduleObject->Set(String::New("exports"), Object::New());
-        contextObject->Set(String::New("module"), moduleObject);
-        contextObject->Set(String::New("exports"), moduleObject->Get(String::New("exports"))->ToObject());
+        // create the module context
+        IsolateContext::CreateModuleContext(contextObject);
 
         // process the source and execute it
         Handle<Value> scriptResult;
@@ -109,7 +107,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
         //Utilities::PrintObjectProperties(contextObject);
 
         // return module export(s)
-        moduleObject = contextObject->Get(String::New("module"))->ToObject();
+        Handle<Object> moduleObject = contextObject->Get(String::New("module"))->ToObject();
         return scope.Close(moduleObject->Get(String::New("exports")));
     }    
 }

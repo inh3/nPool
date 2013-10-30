@@ -8,6 +8,8 @@ function XMLParser () {
         var xmlDoc = new DOMParser().parseFromString(xmlString.xmlData, 'text/xml');
         var json = XML2JSON(xmlDoc);
 
+        console.log('*** XML Parser ***');
+
         return { jsonObject: json };
     };
 }
