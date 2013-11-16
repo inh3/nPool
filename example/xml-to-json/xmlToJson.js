@@ -16,7 +16,7 @@ var startTime = (new Date()).getTime();
 
 // create the unit of work object
 var unitOfWork = {
-    workId: 99,
+    workId: 1,
     fileKey: 1,
     workFunction: 'parseXmlData',
     workParam: {
@@ -28,6 +28,10 @@ var unitOfWork = {
 };
 
 // queue unit of work on thread pool
+nPool.queueWork(unitOfWork);
+unitOfWork.workId++;
+nPool.queueWork(unitOfWork);
+unitOfWork.workId++;
 nPool.queueWork(unitOfWork);
 
 // set continous timeout on main thread every 250ms
