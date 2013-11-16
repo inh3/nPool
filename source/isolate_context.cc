@@ -1,5 +1,8 @@
 #include "isolate_context.h"
 
+// C
+#include "string.h"
+
 // Custom
 #include "nrequire.h"
 
@@ -52,6 +55,14 @@ void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
     globalContext->Set(String::NewSymbol("console"), consoleObject);
 }
 
+void IsolateContext::UpdateGlobalContextDirName(Handle<Object> globalContext, const FILE_INFO* fileInfo)
+{
+    HandleScope handleScope;
+    
+    // copy global properties
+    globalContext->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath, strlen(fileInfo->fullPath) + 1));
+}
+
 void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
 {
     HandleScope handleScope;
@@ -61,7 +72,7 @@ void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handl
     cloneObject->Set(String::NewSymbol("console"), sourceObject->Get(String::NewSymbol("console")));
 }
 
-void IsolateContext::CreateModuleContext(Handle<Object> contextObject)
+void IsolateContext::CreateModuleContext(Handle<Object> contextObject, const FILE_INFO* fileInfo)
 {
     HandleScope handleScope;
 
@@ -70,4 +81,10 @@ void IsolateContext::CreateModuleContext(Handle<Object> contextObject)
     moduleObject->Set(String::NewSymbol("exports"), Object::New());
     contextObject->Set(String::NewSymbol("module"), moduleObject);
     contextObject->Set(String::NewSymbol("exports"), moduleObject->Get(String::NewSymbol("exports"))->ToObject());
+
+    // copy file properties
+    if(fileInfo != NULL)
+    {
+        contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath, strlen(fileInfo->fullPath) + 1));
+    }
 }

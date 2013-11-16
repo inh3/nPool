@@ -88,7 +88,7 @@ void Thread::ThreadPostInit(void* threadContext)
         IsolateContext::CreateGlobalContext(globalContext);
 
         // create module context
-        IsolateContext::CreateModuleContext(globalContext);
+        IsolateContext::CreateModuleContext(globalContext, NULL);
     }
 
     // leave the isolate
@@ -221,11 +221,11 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
     THREAD_WORK_ITEM* workItem = (THREAD_WORK_ITEM*)threadWorkItem;
 
     // check module cache
-    const string* workFile = 0;
+    const FILE_INFO* workFileInfo = 0;
     if(thisContext->moduleMap->find(workItem->fileKey) == thisContext->moduleMap->end())
     {
         // get work file string
-        workFile = fileManager->GetFileString(workItem->fileKey);
+        workFileInfo = fileManager->GetFileInfo(workItem->fileKey);
     }
 
     // get reference to thread isolate
@@ -246,10 +246,14 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         // get the module string if necessary
         Handle<Object> workerObject;
         TryCatch tryCatch;
-        if(workFile != 0)
+        if(workFileInfo->fullPath != 0)
         {
+            // update the context for file properties of work file
+            Handle<Object> globalContext = thisContext->threadJSContext->Global();
+            IsolateContext::UpdateGlobalContextDirName(globalContext, workFileInfo);
+
             // compile the source code
-            Handle<Script> script = Script::Compile(String::New(workFile->c_str()));
+            Handle<Script> script = Script::Compile(String::New(workFileInfo->fileBuffer));
 
             // throw exception if script failed to compile
             if(script.IsEmpty() || tryCatch.HasCaught())

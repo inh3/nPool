@@ -17,7 +17,10 @@ using namespace std;
 // threadpool
 #include "synchronize.h"
 
-typedef unordered_map<uint32_t, string> FileMap;
+// custom
+#include "utilities.h"
+
+typedef unordered_map<uint32_t, const FILE_INFO*> FileMap;
 
 // success/fail of adding a task item to the queue
 typedef enum LOAD_FILE_STATUS_ENUM
@@ -50,7 +53,7 @@ class FileManager
         void                RemoveFile(uint32_t fileKey);
 
         // get file string
-        const string*       GetFileString(uint32_t fileKey);
+        const FILE_INFO*    GetFileInfo(uint32_t fileKey);
 
     protected:
 

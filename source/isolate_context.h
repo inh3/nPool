@@ -6,6 +6,9 @@
 #include <v8.h>
 using namespace v8;
 
+// Custom
+#include "utilities.h"
+
 class IsolateContext
 {
     public:
@@ -15,7 +18,8 @@ class IsolateContext
         static void             CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject);
 
         // context per module
-        static void             CreateModuleContext(Handle<Object> contextObject);
+        static void             CreateModuleContext(Handle<Object> contextObject, const FILE_INFO* fileInfo);
+        static void             UpdateGlobalContextDirName(Handle<Object> globalContext, const FILE_INFO* fileInfo);
 };
 
 #endif /* _ISOLATE_CONTEXT_H_ */

@@ -8,12 +8,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
-
 // Custom
 #include "utilities.h"
 #include "isolate_context.h"
@@ -33,14 +27,13 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 	String::AsciiValue fileName(v8FileName);
 
 	// allocate file buffer
-    int fileSize = 0;
-    const char *fileBuffer = Utilities::ReadFile(*fileName, &fileSize);
+    const FILE_INFO* fileInfo = Utilities::GetFileInfo(*fileName);
 
     // file was invalid
-    if(fileBuffer == 0)
+    if(fileInfo->fileBuffer == 0)
     {
         std::string exceptionPrefix("Require::RequireFunction - File Name is invalid: ");
-        std::string exceptionFileName(*fileName);
+        std::string exceptionFileName(fileInfo->fileName);
         std::string exceptionString = exceptionPrefix + exceptionFileName;
         return scope.Close(ThrowException(Exception::Error(String::New(exceptionString.c_str()))));
     }
@@ -48,7 +41,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
     else
     {
         // register external memory
-        V8::AdjustAmountOfExternalAllocatedMemory(fileSize);
+        V8::AdjustAmountOfExternalAllocatedMemory(fileInfo->fileBufferLength);
 
         // get reference to calling context
         Handle<Context> globalContext = Context::GetCalling();
@@ -69,7 +62,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
         Handle<Object> contextObject = moduleContext->Global();
 
         // create the module context
-        IsolateContext::CreateModuleContext(contextObject);
+        IsolateContext::CreateModuleContext(contextObject, fileInfo);
 
         // process the source and execute it
         Handle<Value> scriptResult;
@@ -77,7 +70,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
             TryCatch scriptTryCatch;
 
             // compile the script
-            Handle<String> sourceString = String::New(fileBuffer);
+            Handle<String> sourceString = String::New(fileInfo->fileBuffer);
             Handle<Script> script = Script::Compile(sourceString);
             
             // throw exception if script failed to compile
@@ -100,8 +93,8 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
         }
 
         // free the file buffer and de-register memory
-        free((char *)fileBuffer);
-        V8::AdjustAmountOfExternalAllocatedMemory(-fileSize);
+        V8::AdjustAmountOfExternalAllocatedMemory(-(fileInfo->fileBufferLength));
+        Utilities::FreeFileInfo(fileInfo);
 
         // print object properties
         //Utilities::PrintObjectProperties(contextObject);

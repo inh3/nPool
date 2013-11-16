@@ -4,6 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+
+// FILE and fxxx()
+#ifndef _WIN32
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 // custom
 #include "synchronize.h"
@@ -26,7 +34,6 @@ const char* Utilities::ToCString(const String::Utf8Value& value)
 
 const char* Utilities::ReadFile(const char* fileName, int* fileSize)
 {
-    
     // reference to c-string version of file
     char *fileBuffer = 0;
 
@@ -45,7 +52,7 @@ const char* Utilities::ReadFile(const char* fileName, int* fileSize)
         rewind(fd);
 
         // allocate file buffer for file contents
-        fileBuffer = new char[*fileSize + 1];
+        fileBuffer = (char*)malloc(*fileSize + 1);
         fileBuffer[*fileSize] = 0;
 
         // copy file contents
@@ -60,15 +67,6 @@ const char* Utilities::ReadFile(const char* fileName, int* fileSize)
     }
 
     return fileBuffer;
-}
-
-void Utilities::CloneObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
-{
-    HandleScope handleScope;
-    
-    // copy global properties
-    Handle<Value> cloneValue = sourceObject->Get(String::NewSymbol("require"));
-    cloneObject->Set(String::NewSymbol("require"), cloneValue);
 }
 
 // https://code.google.com/p/v8/source/browse/trunk/samples/shell.cc
@@ -146,4 +144,45 @@ void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
         String::AsciiValue propertyName(keyString);
         fprintf(stdout, "[ Property %u ] %s\n", keyIndex, *propertyName);
     }
+}
+
+FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
+{
+    // return value
+    FILE_INFO* fileInfo = (FILE_INFO*)malloc(sizeof(FILE_INFO));
+    memset(fileInfo, 0, sizeof(FILE_INFO));
+
+    #ifdef _WIN32
+        // http://msdn.microsoft.com/en-us/library/506720ff.aspx
+        fileInfo->fullPath = (const char*)malloc(_MAX_PATH);
+        memset((void*)fileInfo->fullPath, 0, _MAX_PATH);
+        if(_fullpath((char*)fileInfo->fullPath, relativePath, _MAX_PATH) != NULL)
+        {
+            printf("_fullpath() - %s\n", fileInfo->fullPath);
+        }
+    #else
+        fileInfo->fullPath = (char*)malloc(PATH_MAX);
+        memset((void*)fileInfo->fullPath, 0, PATH_MAX);
+        realpath(relativePath, (char *)fileInfo->fullPath);
+        fprintf(stdout, "realpath() - %s\n", fileInfo->fullPath);
+    #endif
+
+    // path is valid
+    if(fileInfo->fullPath != 0)
+    {
+        // allocate file buffer
+        fileInfo->fileBuffer = Utilities::ReadFile(fileInfo->fullPath, &(fileInfo->fileBufferLength));
+    }
+
+    return fileInfo;
+}
+
+void Utilities::FreeFileInfo(const FILE_INFO* fileInfo)
+{
+    free((void*)fileInfo->fileName);
+    free((void*)fileInfo->folderPath);
+    free((void*)fileInfo->fullPath);
+    free((void*)fileInfo->fileBuffer);
+
+    free((FILE_INFO*)fileInfo);
 }
