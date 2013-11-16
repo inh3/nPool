@@ -11,15 +11,15 @@ using namespace v8;
 
 typedef struct FILE_INFO_STRUCT
 {
-    const char*     fileName;
+    const char*             fileName;
 
-    const char*     folderPath;
+    const char*             folderPath;
 
-    const char*     fullPath;
+    const char*             fullPath;
 
-    const char*     fileBuffer;
+    const char*             fileBuffer;
 
-    int             fileBufferLength;
+    int                     fileBufferLength;
 
 } FILE_INFO;
 

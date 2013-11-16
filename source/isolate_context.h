@@ -19,7 +19,7 @@ class IsolateContext
 
         // context per module
         static void             CreateModuleContext(Handle<Object> contextObject, const FILE_INFO* fileInfo);
-        static void             UpdateGlobalContextDirName(Handle<Object> globalContext, const FILE_INFO* fileInfo);
+        static void             UpdateContextFileProperties(Handle<Object> contextObject, const FILE_INFO* fileInfo);
 };
 
 #endif /* _ISOLATE_CONTEXT_H_ */

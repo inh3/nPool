@@ -55,12 +55,12 @@ void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
     globalContext->Set(String::NewSymbol("console"), consoleObject);
 }
 
-void IsolateContext::UpdateGlobalContextDirName(Handle<Object> globalContext, const FILE_INFO* fileInfo)
+void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, const FILE_INFO* fileInfo)
 {
     HandleScope handleScope;
-    
-    // copy global properties
-    globalContext->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath, strlen(fileInfo->fullPath) + 1));
+
+    // set the file properites on the context
+    contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath));
 }
 
 void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
@@ -85,6 +85,6 @@ void IsolateContext::CreateModuleContext(Handle<Object> contextObject, const FIL
     // copy file properties
     if(fileInfo != NULL)
     {
-        contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath, strlen(fileInfo->fullPath) + 1));
+        IsolateContext::UpdateContextFileProperties(contextObject, fileInfo);
     }
 }

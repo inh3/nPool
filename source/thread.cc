@@ -246,11 +246,11 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         // get the module string if necessary
         Handle<Object> workerObject;
         TryCatch tryCatch;
-        if(workFileInfo->fullPath != 0)
+        if(workFileInfo != 0)
         {
             // update the context for file properties of work file
             Handle<Object> globalContext = thisContext->threadJSContext->Global();
-            IsolateContext::UpdateGlobalContextDirName(globalContext, workFileInfo);
+            IsolateContext::UpdateContextFileProperties(globalContext, workFileInfo);
 
             // compile the source code
             Handle<Script> script = Script::Compile(String::New(workFileInfo->fileBuffer));
