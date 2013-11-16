@@ -61,8 +61,7 @@ LOAD_FILE_STATUS FileManager::LoadFile(uint32_t fileKey, char* filePath)
         {
             // store file string to file map
             this->fileMap->insert(FileMap::value_type(fileKey, fileInfo));
-
-            fprintf(stdout, "[ FileManager ] - File loaded: %s (%u)\n", fileInfo->fullPath, fileKey);
+            //fprintf(stdout, "[ FileManager ] - File loaded: %s (%u)\n", fileInfo->fullPath, fileKey);
         }
     }
     else
