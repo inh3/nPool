@@ -9,9 +9,9 @@ catch (e) {
 }
 
 describe("[ queueWork() - Tests ]", function() {
-  it("OK", function() {
-    assert.notEqual(nPool, undefined);
-  });
+    it("OK", function() {
+        assert.notEqual(nPool, undefined);
+    });
 });
 
 describe("queueWork() shall throw an exception when passed an invalid argument.", function() {
@@ -107,7 +107,7 @@ describe("queueWork() shall execute without throwing an exception when a single 
     });
 });
 
-describe("queueWork() shall execute without throwing an exception when a single valid unit of work is queued.", function() {
+describe("queueWork() shall execute without throwing an exception when multiple valid units of work are queued.", function() {
 
     before(function() {
         nPool.loadFile(1, __dirname + '/resources/fibonacciModule.js');

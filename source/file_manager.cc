@@ -78,7 +78,7 @@ LOAD_FILE_STATUS FileManager::LoadFile(uint32_t fileKey, char* filePath)
 
 void FileManager::RemoveFile(uint32_t fileKey)
 {
-    fprintf(stdout, "FileManager::RemoveFile - FileKey: %u\n", fileKey);
+    //fprintf(stdout, "FileManager::RemoveFile - FileKey: %u\n", fileKey);
 
     SyncLockMutex(&(this->fileMapMutex));
 

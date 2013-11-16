@@ -73,7 +73,7 @@ static FileManager          *fileManager    = 0;
 
 Handle<Value> CreateThreadPool(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - CreateThreadPool\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - CreateThreadPool\n", SyncGetThreadId());
 
     HandleScope scope;
 
@@ -95,7 +95,7 @@ Handle<Value> CreateThreadPool(const Arguments& args)
     Local<Uint32> v8NumThreads = (args[0])->ToUint32();
     uint32_t numThreads = v8NumThreads->Value();
 
-    fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
+    //fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
 
     // create task queue and thread pool
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
@@ -106,7 +106,7 @@ Handle<Value> CreateThreadPool(const Arguments& args)
 
 Handle<Value> DestoryThreadPool(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
 
     HandleScope scope;
 
@@ -130,7 +130,7 @@ Handle<Value> DestoryThreadPool(const Arguments& args)
 
 Handle<Value> LoadFile(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - LoadFile\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - LoadFile\n", SyncGetThreadId());
 
     HandleScope scope;
 
@@ -161,7 +161,7 @@ Handle<Value> LoadFile(const Arguments& args)
 
 Handle<Value> RemoveFile(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - RemoveFile\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - RemoveFile\n", SyncGetThreadId());
 
     HandleScope scope;
 
