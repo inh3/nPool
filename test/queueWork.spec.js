@@ -84,7 +84,6 @@ describe("queueWork() shall execute without throwing an exception when a single 
             },
 
             callbackFunction: function(callbackObject, workId) {
-
                 try {
                     assert.equal(thrownException, null);
                     assert.equal(callbackObject.resultString, 'Hello World - queueWork() - Test In Progress');
@@ -130,13 +129,8 @@ describe("queueWork() shall execute without throwing an exception when a single 
         // test for total execution count
         var executionIterations = 10;
 
-        // make sure test ends within 1 sec
-        this.timeout(1250);
-        
-        // count total number of executions in .5 sec
-        setTimeout(function() {
-            done(assertionException);
-        }, 1000);
+        // make sure test ends within 5 sec
+        this.timeout(5);
 
         // execute the tests
         for(var i = 0; i < executionIterations; i++) {
@@ -150,7 +144,6 @@ describe("queueWork() shall execute without throwing an exception when a single 
                 },
 
                 callbackFunction: function(callbackObject, workId) {
-                    // capture assertion exceptions
                     try {
                         assert.equal(thrownException, null);
                         assert.equal(callbackObject.fibCalcResult, 55);
@@ -159,7 +152,11 @@ describe("queueWork() shall execute without throwing an exception when a single 
                     catch(exception) {
                         assertionException = exception;
                     }
-                    ++totalExecutions;
+
+                    // wait until all executions occur
+                    if(++totalExecutions == 10) {
+                        done(assertionException);
+                    }
                 },
                 callbackContext: this
             };
