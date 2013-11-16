@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
 
 // FILE and fxxx()
 #ifndef _WIN32
@@ -158,10 +159,23 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
         fileInfo->fullPath = (const char*)malloc(_MAX_PATH);
         memset((void*)fileInfo->fullPath, 0, _MAX_PATH);
         _fullpath((char*)fileInfo->fullPath, relativePath, _MAX_PATH);
+        
+        // http://msdn.microsoft.com/en-us/library/1w06ktdy.aspx
+        if((_access((char*)fileInfo->fullPath, 0 )) == -1)
+        {
+            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            free((void*)fileInfo->fullPath);
+            fileInfo->fullPath = 0;
+        }
     #else
         fileInfo->fullPath = (char*)malloc(PATH_MAX);
         memset((void*)fileInfo->fullPath, 0, PATH_MAX);
-        realpath(relativePath, (char *)fileInfo->fullPath);
+        if(realpath(relativePath, (char *)fileInfo->fullPath) == NULL)
+        {
+            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            free((void*)fileInfo->fullPath);
+            fileInfo->fullPath = 0;
+        }
     #endif
 
     // path is valid

@@ -33,7 +33,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
     if(fileInfo->fileBuffer == 0)
     {
         std::string exceptionPrefix("Require::RequireFunction - File Name is invalid: ");
-        std::string exceptionFileName(fileInfo->fileName);
+        std::string exceptionFileName(fileInfo->fullPath);
         std::string exceptionString = exceptionPrefix + exceptionFileName;
         return scope.Close(ThrowException(Exception::Error(String::New(exceptionString.c_str()))));
     }
