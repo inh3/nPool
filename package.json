@@ -47,5 +47,9 @@
   "engines": {
     "node": ">= 0.10.0 < 0.11"
   },
-  "engine-strict": true
+  "engine-strict": true,
+
+  "devDependencies": {
+    "mocha": ">= 1.13.0"
+  }
 }

@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <errno.h>
 
 // FILE and fxxx()
 #ifndef _WIN32
