@@ -18,8 +18,7 @@ static Handle<Value> ConsoleLog(const Arguments& args)
 
     // get log message
     String::AsciiValue logMessage((args[0])->ToString());
-    fprintf(stdout, *logMessage);
-    fprintf(stdout, "\n");
+    printf("%s\n", *logMessage);
 
     return scope.Close(Undefined());
 }
@@ -60,7 +59,7 @@ void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, c
     HandleScope handleScope;
 
     // set the file properites on the context
-    contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->fullPath));
+    contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->folderPath));
 }
 
 void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)

@@ -152,36 +152,54 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
     FILE_INFO* fileInfo = (FILE_INFO*)malloc(sizeof(FILE_INFO));
     memset(fileInfo, 0, sizeof(FILE_INFO));
 
+    // get the full path of the file
     #ifdef _WIN32
         // http://msdn.microsoft.com/en-us/library/506720ff.aspx
         fileInfo->fullPath = (const char*)malloc(_MAX_PATH);
         memset((void*)fileInfo->fullPath, 0, _MAX_PATH);
-        if(_fullpath((char*)fileInfo->fullPath, relativePath, _MAX_PATH) != NULL)
-        {
-            printf("_fullpath() - %s\n", fileInfo->fullPath);
-        }
+        _fullpath((char*)fileInfo->fullPath, relativePath, _MAX_PATH);
     #else
         fileInfo->fullPath = (char*)malloc(PATH_MAX);
         memset((void*)fileInfo->fullPath, 0, PATH_MAX);
         realpath(relativePath, (char *)fileInfo->fullPath);
-        fprintf(stdout, "realpath() - %s\n", fileInfo->fullPath);
     #endif
 
     // path is valid
     if(fileInfo->fullPath != 0)
     {
+        // get the file name only
+        // http://stackoverflow.com/a/5902743
+        const char *charPtr = fileInfo->fullPath + strlen(fileInfo->fullPath);
+        for (; charPtr > fileInfo->fullPath; charPtr--)
+        {
+            if ((*charPtr == '\\') || (*charPtr == '/'))
+            {
+                fileInfo->fileName = ++charPtr;
+                break;
+            }
+        }
+
+        // allocate and store the folder only path
+        unsigned int folderPathLength = strlen(fileInfo->fullPath) - strlen(fileInfo->fileName);
+        fileInfo->folderPath = (const char*)malloc(folderPathLength + 1);
+        memset((void*)fileInfo->folderPath, 0, folderPathLength + 1);
+        memcpy((void*)fileInfo->folderPath, fileInfo->fullPath, folderPathLength);
+
         // allocate file buffer
         fileInfo->fileBuffer = Utilities::ReadFile(fileInfo->fullPath, &(fileInfo->fileBufferLength));
     }
+
+    fprintf(stdout, "[ Utilities - File ] Full Path: %s\n", fileInfo->fullPath);
+    fprintf(stdout, "[ Utilities - File ] Folder Path: %s\n", fileInfo->folderPath);
+    fprintf(stdout, "[ Utilities - File ] File Name: %s\n", fileInfo->fileName);
 
     return fileInfo;
 }
 
 void Utilities::FreeFileInfo(const FILE_INFO* fileInfo)
 {
-    free((void*)fileInfo->fileName);
-    free((void*)fileInfo->folderPath);
     free((void*)fileInfo->fullPath);
+    free((void*)fileInfo->folderPath);
     free((void*)fileInfo->fileBuffer);
 
     free((FILE_INFO*)fileInfo);
