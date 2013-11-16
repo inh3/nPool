@@ -114,7 +114,7 @@ var count = 0;
 })();
 
 // add 6 units of work to thread pool queue
-for(var workCount = 0; workCount < 7; workCount++) {
+for(var workCount = 0; workCount < 10; workCount++) {
 
     // create the unit of work object
     var unitOfWork = {

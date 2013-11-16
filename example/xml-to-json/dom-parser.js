@@ -261,8 +261,8 @@ function appendElement (hander,node) {
 if(typeof require == 'function'){
     //console.log("********* " + __dirname);
 
-    var XMLReader = require('./sax.js').XMLReader;
-    var DOM = require('./dom.js');
+    var XMLReader = require(__dirname + './sax.js').XMLReader;
+    var DOM = require(__dirname + './dom.js');
     var DOMImplementation = exports.DOMImplementation = DOM.DOMImplementation;
     exports.XMLSerializer = DOM.XMLSerializer ;
 

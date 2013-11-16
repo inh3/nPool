@@ -27,6 +27,9 @@ void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
 {
     HandleScope handleScope;
 
+    // global namespace object
+    globalContext->Set(String::NewSymbol("global"), Object::New());
+
     // require(...)
 
     // get handle to nRequire function
@@ -52,6 +55,7 @@ void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
 
     // attach object to context
     globalContext->Set(String::NewSymbol("console"), consoleObject);
+
 }
 
 void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, const FILE_INFO* fileInfo)
@@ -60,6 +64,7 @@ void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, c
 
     // set the file properites on the context
     contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->folderPath));
+    contextObject->Set(String::NewSymbol("__filename"), String::New(fileInfo->fullPath));
 }
 
 void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
@@ -67,6 +72,7 @@ void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handl
     HandleScope handleScope;
     
     // copy global properties
+    cloneObject->Set(String::NewSymbol("global"), sourceObject->Get(String::NewSymbol("global")));
     cloneObject->Set(String::NewSymbol("require"), sourceObject->Get(String::NewSymbol("require")));
     cloneObject->Set(String::NewSymbol("console"), sourceObject->Get(String::NewSymbol("console")));
 }

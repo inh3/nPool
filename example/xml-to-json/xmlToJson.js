@@ -43,6 +43,7 @@ var count = 0;
         setTimeout(spinForever, 250);
     }
     else {
+        nPool.removeFile(1);
         nPool.destroyThreadPool();
     }
 })();

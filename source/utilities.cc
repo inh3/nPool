@@ -189,9 +189,9 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
         fileInfo->fileBuffer = Utilities::ReadFile(fileInfo->fullPath, &(fileInfo->fileBufferLength));
     }
 
-    fprintf(stdout, "[ Utilities - File ] Full Path: %s\n", fileInfo->fullPath);
-    fprintf(stdout, "[ Utilities - File ] Folder Path: %s\n", fileInfo->folderPath);
-    fprintf(stdout, "[ Utilities - File ] File Name: %s\n", fileInfo->fileName);
+    //fprintf(stdout, "[ Utilities - File ] Full Path: %s\n", fileInfo->fullPath);
+    //fprintf(stdout, "[ Utilities - File ] Folder Path: %s\n", fileInfo->folderPath);
+    //fprintf(stdout, "[ Utilities - File ] File Name: %s\n", fileInfo->fileName);
 
     return fileInfo;
 }
