@@ -178,3 +178,101 @@ describe("queueWork() shall complete the callback with an exception object when 
         }
     });
 });
+
+describe("queueWork() shall complete the callback with an exception object when a sub-module performs logic resulting in an exception", function() {
+
+    before(function() {
+        nPool.loadFile(1, __dirname + '/resources/exceptionParentModule.js');
+        nPool.createThreadPool(2);
+    });
+
+    after(function() {
+        nPool.destroyThreadPool();
+        nPool.removeFile(1);
+    });
+
+    it("Executed and performed callback with a valid exception object.", function(done) {
+        var thrownException = null;
+        var resultObject = null;
+        var resultId = null;
+
+        var unitOfWork = {
+            workId: 1,
+            fileKey: 1,
+            workFunction: "exceptionParentFunction",
+            workParam: {
+                testObject: { objectProp: 'test property ' }
+            },
+
+            callbackFunction: function(callbackObject, workId, exceptionObject) {
+                try {
+                    assert.equal(thrownException, null);
+                    assert.equal(typeof exceptionObject, "object");
+                    assert.equal(workId, 1);
+                    done();
+                }
+                catch(exception) {
+                    done(exception);
+                }
+            },
+            callbackContext: this
+        };
+
+        try
+        {
+            nPool.queueWork(unitOfWork);
+        }
+        catch (exception) {
+            thrownException = exception;
+        }
+    });
+});
+
+describe("queueWork() shall complete the callback with an exception object when a the work function is not defined", function() {
+
+    before(function() {
+        nPool.loadFile(1, __dirname + '/resources/helloWorld.js');
+        nPool.createThreadPool(2);
+    });
+
+    after(function() {
+        nPool.destroyThreadPool();
+        nPool.removeFile(1);
+    });
+
+    it("Executed and performed callback with a valid exception object.", function(done) {
+        var thrownException = null;
+        var resultObject = null;
+        var resultId = null;
+
+        var unitOfWork = {
+            workId: 1,
+            fileKey: 1,
+            workFunction: "thisIsNotAValidFunction",
+            workParam: {
+                testString: '- queueWork() - Test In Progress'
+            },
+
+            callbackFunction: function(callbackObject, workId, exceptionObject) {
+                try {
+                    assert.equal(thrownException, null);
+                    assert.equal(typeof exceptionObject, "object");
+                    assert.equal(workId, 1);
+                    done();
+                }
+                catch(exception) {
+                    done(exception);
+                }
+            },
+            callbackContext: this
+        };
+
+        try
+        {
+            nPool.queueWork(unitOfWork);
+        }
+        catch (exception) {
+            thrownException = exception;
+        }
+    });
+});

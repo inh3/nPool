@@ -40,11 +40,12 @@ describe("queueWork() shall execute without throwing an exception when a single 
                 testString: '- queueWork() - Test In Progress'
             },
 
-            callbackFunction: function(callbackObject, workId) {
+            callbackFunction: function(callbackObject, workId, exceptionObject) {
                 try {
                     assert.equal(thrownException, null);
                     assert.equal(callbackObject.resultString, 'Hello World - queueWork() - Test In Progress');
                     assert.equal(workId, 1);
+                    assert.equal(exceptionObject, null);
                     done();
                 }
                 catch(exception) {
@@ -100,11 +101,12 @@ describe("queueWork() shall execute without throwing an exception when multiple 
                     fibNumber: 10
                 },
 
-                callbackFunction: function(callbackObject, workId) {
+                callbackFunction: function(callbackObject, workId, exceptionObject) {
                     try {
                         assert.equal(thrownException, null);
                         assert.equal(callbackObject.fibCalcResult, 55);
                         assert.equal(workId, 1);
+                        assert.equal(exceptionObject, null);
                     }
                     catch(exception) {
                         assertionException = exception;
