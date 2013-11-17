@@ -130,3 +130,103 @@ describe("queueWork() shall execute without throwing an exception when multiple 
         }
     });
 });
+
+describe("queueWork() shall execute without throwing an exception when a using sub-modules.", function() {
+
+    before(function() {
+        nPool.loadFile(1, __dirname + '/resources/subModuleWorker.js');
+        nPool.createThreadPool(2);
+    });
+
+    after(function() {
+        nPool.destroyThreadPool();
+        nPool.removeFile(1);
+    });
+
+    it("Executed without throwing an exception and returned valid results with a constructor sub-module.", function(done) {
+        var thrownException = null;
+        var resultObject = null;
+        var resultId = null;
+
+        var unitOfWork = {
+            workId: 1,
+            fileKey: 1,
+            workFunction: "executeSubModuleFunction",
+            workParam: {
+                fruitArray: [
+                    {
+                        name: "apple",
+                        color: "red"
+                    },
+                    {
+                        name: "strawberry",
+                        color: "red"
+                    },
+                    {
+                        name: "banana",
+                        color: "yellow"
+                    }
+                ]
+            },
+
+            callbackFunction: function(callbackObject, workId, exceptionObject) {
+                try {
+                    assert.equal(exceptionObject, null);
+                    assert.equal(thrownException, null);
+                    assert.equal(Array.isArray(callbackObject.origFruitArray), true);
+                    assert.equal(Array.isArray(callbackObject.fruitNames), true);
+                    assert.equal(callbackObject.fruitCount, 3);
+                    assert.equal(workId, 1);
+                    done();
+                }
+                catch(exception) {
+                    done(exception);
+                }
+            },
+            callbackContext: this
+        };
+
+        try
+        {
+            nPool.queueWork(unitOfWork);
+        }
+        catch (exception) {
+            thrownException = exception;
+        }
+    });
+
+    it("Executed without throwing an exception and returned valid results with a non-constructor sub-module.", function(done) {
+        var thrownException = null;
+        var resultObject = null;
+        var resultId = null;
+
+        var unitOfWork = {
+            workId: 1,
+            fileKey: 1,
+            workFunction: "executeNotConstructorSubModuleFunction",
+            workParam: {},
+
+            callbackFunction: function(callbackObject, workId, exceptionObject) {
+                try {
+                    assert.equal(exceptionObject, null);
+                    assert.equal(thrownException, null);
+                    assert.equal(callbackObject.resultString, "Test function successfully called!");
+                    assert.equal(workId, 1);
+                    done();
+                }
+                catch(exception) {
+                    done(exception);
+                }
+            },
+            callbackContext: this
+        };
+
+        try
+        {
+            nPool.queueWork(unitOfWork);
+        }
+        catch (exception) {
+            thrownException = exception;
+        }
+    });
+});
