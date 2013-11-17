@@ -50,6 +50,6 @@
   "engine-strict": true,
 
   "devDependencies": {
-    "mocha": ">= 1.13.0"
+    "mocha": ">= 1.14.0"
   }
 }
