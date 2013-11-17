@@ -15,50 +15,6 @@ describe("[ queueWork() - Tests ]", function() {
     });
 });
 
-describe("queueWork() shall throw an exception when passed an invalid argument.", function() {
-
-    before(function() {
-        nPool.createThreadPool(2);
-    });
-
-    after(function() {
-        nPool.destroyThreadPool();
-    });
-
-    it("Exception thrown when there are no parameters.", function() {
-        var thrownException = null;
-        try {
-            nPool.queueWork();
-        }
-        catch(exception) {
-            thrownException = exception;
-        }
-        assert.notEqual(nPool, null);
-    });
-
-    it("Exception thrown when there is more than 1 parameter.", function() {
-        var thrownException = null;
-        try {
-            nPool.queueWork({}, 'extraParameter');
-        }
-        catch(exception) {
-            thrownException = exception;
-        }
-        assert.notEqual(nPool, null);
-    });
-
-    it("Exception thrown when the parameter is of the wrong type.", function() {
-        var thrownException = null;
-        try {
-            nPool.queueWork('invalid type');
-        }
-        catch(exception) {
-            thrownException = exception;
-        }
-        assert.notEqual(nPool, null);
-    });
-});
-
 describe("queueWork() shall execute without throwing an exception when a single valid unit of work is queued.", function() {
 
     before(function() {

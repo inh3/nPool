@@ -117,53 +117,55 @@ void Thread::ThreadDestroy(void* threadContext)
 
 THREAD_WORK_ITEM* Thread::BuildWorkItem(Handle<Object> v8Object)
 {
-    //fprintf(stdout, "[%u] Thread::BuildWorkItem\n", SyncGetThreadId());
-    //Utilities::ParseObject(v8Object);
+    // work item to be returned
+    THREAD_WORK_ITEM *workItem = NULL;
 
-    // return value
-    THREAD_WORK_ITEM *workItem = (THREAD_WORK_ITEM*)malloc(sizeof(THREAD_WORK_ITEM));
-    memset(workItem, 0, sizeof(THREAD_WORK_ITEM));
+    // exception catcher
+    TryCatch tryCatch;
 
-    // temporary handles
-    Local<String> propertyName;
-    Local<Value> propertyValue;
-    Local<String> propertyString;
-    Local<Object> propertyObject;
+    // get all the properties from the object
+    Local<Number> workId = v8Object->Get(String::NewSymbol("workId"))->ToUint32();
+    Local<Number> fileKey = v8Object->Get(String::NewSymbol("fileKey"))->ToUint32();
+    Local<String> workFunction = v8Object->Get(String::NewSymbol("workFunction"))->ToString();
+    Local<Object> workParam = v8Object->Get(String::NewSymbol("workParam"))->ToObject();
+    Local<Object> callbackContext = v8Object->Get(String::NewSymbol("callbackContext"))->ToObject();
+    Handle<Function> callbackFunction = Handle<Function>::Cast(v8Object->Get(String::NewSymbol("callbackFunction")));
 
-    // workId
-    propertyName = String::New("workId");
-    propertyValue = v8Object->Get(propertyName);
-    workItem->workId = propertyValue->ToUint32()->Value();
-    //fprintf(stdout, "[%u] Thread::BuildWorkItem - WorkId: %u\n", SyncGetThreadId(), propertyValue->ToUint32()->Value());
+    // determine if the object is valid
+    bool isInvalidWorkObject = (workId.IsEmpty() || fileKey.IsEmpty() ||
+                                workFunction.IsEmpty() || workParam.IsEmpty() ||
+                                callbackContext.IsEmpty() || callbackFunction.IsEmpty());
 
-    // fileKey
-    propertyName = String::New("fileKey");
-    propertyValue = v8Object->Get(propertyName);
-    workItem->fileKey = propertyValue->ToUint32()->Value();
+    // ensure there weren't any exceptions and properties were valid
+    if((isInvalidWorkObject == false) || !(tryCatch.HasCaught()))
+    {
+        // return value
+        workItem = (THREAD_WORK_ITEM*)malloc(sizeof(THREAD_WORK_ITEM));
+        memset(workItem, 0, sizeof(THREAD_WORK_ITEM));
 
-    // workFunction
-    propertyName = String::New("workFunction");
-    propertyString = v8Object->Get(propertyName)->ToString();
-    workItem->workFunction = Utilities::CreateCharBuffer(propertyString);
+        // workId
+        workItem->workId = workId->Value();
 
-    // generate JSON c str of param object
-    propertyName = String::New("workParam");
-    propertyObject = v8Object->Get(propertyName)->ToObject();
-    char* stringify = JSON::Stringify(propertyObject);
-    workItem->workParam = stringify;
+        // fileKey
+        workItem->fileKey = fileKey->Value();
 
-    // callback context
-    propertyName = String::New("callbackContext");
-    propertyObject = v8Object->Get(propertyName)->ToObject();
-    workItem->callbackContext = Persistent<Object>::New(propertyObject);
+        // workFunction
+        workItem->workFunction = Utilities::CreateCharBuffer(workFunction);
 
-    // callback function
-    propertyName = String::New("callbackFunction");
-    workItem->callbackFunction = Persistent<Function>::New(Handle<Function>::Cast(v8Object->Get(propertyName)));
+        // generate JSON c str of param object
+        char* stringify = JSON::Stringify(workParam);
+        workItem->workParam = stringify;
 
-    // register external memory
-    int bytesAlloc = strlen(workItem->workParam) + strlen(workItem->workFunction);
-    V8::AdjustAmountOfExternalAllocatedMemory(bytesAlloc);
+        // callback context
+        workItem->callbackContext = Persistent<Object>::New(callbackContext);
+
+        // callback function
+        workItem->callbackFunction = Persistent<Function>::New(callbackFunction);
+
+        // register external memory
+        int bytesAlloc = strlen(workItem->workParam) + strlen(workItem->workFunction);
+        V8::AdjustAmountOfExternalAllocatedMemory(bytesAlloc);
+    }
 
     return workItem;
 }

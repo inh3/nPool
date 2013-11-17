@@ -198,8 +198,16 @@ Handle<Value> QueueWork(const Arguments& args)
     Handle<Value> v8Object = args[0];
     THREAD_WORK_ITEM* workItem = Thread::BuildWorkItem(v8Object->ToObject());
 
-    // queue the work
-    Thread::QueueWorkItem(taskQueue, workItem);
+    if(workItem == NULL)
+    {
+        ThrowException(Exception::TypeError(String::New("queueWork() - Work item is malformed")));
+        return scope.Close(Undefined());
+    }
+    else
+    {
+        // queue the work
+        Thread::QueueWorkItem(taskQueue, workItem);
+    }
 
     return scope.Close(Undefined());
 }
