@@ -162,7 +162,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
         // http://msdn.microsoft.com/en-us/library/1w06ktdy.aspx
         if((_access((char*)fileInfo->fullPath, 0 )) == -1)
         {
-            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }
@@ -171,7 +171,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
         memset((void*)fileInfo->fullPath, 0, PATH_MAX);
         if(realpath(relativePath, (char *)fileInfo->fullPath) == NULL)
         {
-            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }

@@ -54,7 +54,7 @@ LOAD_FILE_STATUS FileManager::LoadFile(uint32_t fileKey, char* filePath)
         // file was invalid
         if(fileInfo->fullPath == 0)
         {
-            fprintf(stderr, "[ FileManager ] - Error opening file: %s\n", fileInfo->fullPath);
+            //fprintf(stderr, "[ FileManager ] - Error opening file: %s\n", fileInfo->fullPath);
             fileStatus = LOAD_FILE_FAIL;
         }
         else
@@ -66,7 +66,7 @@ LOAD_FILE_STATUS FileManager::LoadFile(uint32_t fileKey, char* filePath)
     }
     else
     {
-        fprintf(stderr, "[ FileManager ] - File key already exists: %u\n", fileKey);
+        //fprintf(stderr, "[ FileManager ] - File key already exists: %u\n", fileKey);
         fileStatus = LOAD_FILE_EXISTS;
     }
 
