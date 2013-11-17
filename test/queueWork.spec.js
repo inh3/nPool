@@ -1,11 +1,12 @@
-var assert = require("assert")
+var assert = require("assert");
 
 // load appropriate npool module
+var nPool = null;
 try {
-    var nPool = require(__dirname + '/../build/Release/npool');
+    nPool = require(__dirname + '/../build/Release/npool');
 }
 catch (e) {
-    var nPool = require(__dirname + '/../build/Debug/npool');
+    nPool = require(__dirname + '/../build/Debug/npool');
 }
 
 describe("[ queueWork() - Tests ]", function() {
@@ -130,7 +131,7 @@ describe("queueWork() shall execute without throwing an exception when multiple 
         var executionIterations = 10;
 
         // make sure test ends within 5 sec
-        this.timeout(5);
+        this.timeout(5000);
 
         // execute the tests
         for(var i = 0; i < executionIterations; i++) {

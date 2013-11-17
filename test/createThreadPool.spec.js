@@ -1,11 +1,12 @@
-var assert = require("assert")
+var assert = require("assert");
 
 // load appropriate npool module
+var nPool = null;
 try {
-    var nPool = require(__dirname + '/../build/Release/npool');
+    nPool = require(__dirname + '/../build/Release/npool');
 }
 catch (e) {
-    var nPool = require(__dirname + '/../build/Debug/npool');
+    nPool = require(__dirname + '/../build/Debug/npool');
 }
 
 describe("[ createThreadPool() - Tests ]", function() {
