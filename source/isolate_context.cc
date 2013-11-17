@@ -11,14 +11,26 @@ static Handle<Value> ConsoleLog(const Arguments& args)
     HandleScope scope;
 
     // validate input
-    if((args.Length() != 1) || !args[0]->IsString())
+    if(args.Length() > 1)
     {
-        return scope.Close(ThrowException(Exception::TypeError(String::New("console.log - Expects 1 argument: log message (string)"))));
+        return scope.Close(ThrowException(Exception::TypeError(String::New("console.log - Expects only 1 argument."))));
     }
 
     // get log message
-    String::AsciiValue logMessage((args[0])->ToString());
-    printf("%s\n", *logMessage);
+    if(args.Length() == 0)
+    {
+        printf("\n");
+    }
+    else
+    {
+        Handle<Object> contextObject = Context::GetCurrent()->Global();
+        Handle<Object> JSON = contextObject->Get(v8::String::New("JSON"))->ToObject();
+        Handle<Function> JSON_stringify = Handle<Function>::Cast(JSON->Get(v8::String::New("stringify")));
+
+        Handle<Value> argHandle = args[0];
+        String::Utf8Value logMessage(JSON_stringify->Call(JSON, 1, &(argHandle)));
+        printf("%s\n", *logMessage);
+    }
 
     return scope.Close(Undefined());
 }
