@@ -16,7 +16,11 @@ var ModuleContextBase = function () {
     };
 
     this.checkSubModuleContext = function(workParam) {
-        return subModuleContext.checkModuleContext(workParam);
+
+        var returnObject = subModuleContext.checkModuleContext(workParam);
+        returnObject.globalWasSetBySubModule = global["subModuleSetThis"];
+
+        return returnObject;
     }
 };
 

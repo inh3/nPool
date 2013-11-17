@@ -115,6 +115,7 @@ describe("When a sub-module is required by a work module it should have properly
                     assert.equal(typeof callbackObject.workParam.stringProperty, "string");
                     assert.equal(typeof callbackObject.__dirname, "string");
                     assert.equal(typeof callbackObject.__filename, "string");
+                    assert.equal(callbackObject.globalWasSetBySubModule, true);
                     assert.equal(callbackObject["console.log"], true);
                     done();
                 }
