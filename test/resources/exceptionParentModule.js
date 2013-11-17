@@ -1,4 +1,4 @@
-var ExceptionModule = require(__dirname + 'exceptionModule.js');
+var ExceptionModule = require(__dirname + '/sub-modules/exceptionModule.js');
 var exceptionModule = new ExceptionModule();
 
 // object type function prototype

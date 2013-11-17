@@ -179,7 +179,7 @@ describe("queueWork() shall complete the callback with an exception object when 
     });
 });
 
-describe("queueWork() shall complete the callback with an exception object when a sub-module performs logic resulting in an exception", function() {
+describe("queueWork() shall complete the callback with an exception object when a sub-module performs logic resulting in an exception.", function() {
 
     before(function() {
         nPool.loadFile(1, __dirname + '/resources/exceptionParentModule.js');
@@ -228,7 +228,7 @@ describe("queueWork() shall complete the callback with an exception object when 
     });
 });
 
-describe("queueWork() shall complete the callback with an exception object when a the work function is not defined", function() {
+describe("queueWork() shall complete the callback with an exception object when a the work function is not defined.", function() {
 
     before(function() {
         nPool.loadFile(1, __dirname + '/resources/helloWorld.js');
