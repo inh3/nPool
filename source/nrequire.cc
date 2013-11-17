@@ -33,7 +33,7 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
     if(fileInfo->fileBuffer == 0)
     {
         std::string exceptionPrefix("Require::RequireFunction - File Name is invalid: ");
-        std::string exceptionFileName(fileInfo->fullPath);
+        std::string exceptionFileName(*fileName);
         std::string exceptionString = exceptionPrefix + exceptionFileName;
         return scope.Close(ThrowException(Exception::Error(String::New(exceptionString.c_str()))));
     }
@@ -71,13 +71,15 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 
             // compile the script
             Handle<String> sourceString = String::New(fileInfo->fileBuffer);
-            Handle<Script> script = Script::Compile(sourceString);
+
+            ScriptOrigin scriptOrigin(String::New(fileInfo->fileName));
+            Handle<Script> script = Script::Compile(sourceString, &scriptOrigin);
             
             // throw exception if script failed to compile
             if(script.IsEmpty() || scriptTryCatch.HasCaught())
             {
-                Utilities::HandleException(&scriptTryCatch, true);
-                return scope.Close(Undefined());
+                Utilities::HandleException(&scriptTryCatch);
+                return scriptTryCatch.ReThrow();
             }
             
             //printf("[%u] Require::RequireFunction - Script Running: %s\n", SyncGetThreadId(), *fileName);
@@ -87,8 +89,8 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
             // throw exception if script failed to execute
             if(scriptResult.IsEmpty() || scriptTryCatch.HasCaught())
             {
-                Utilities::HandleException(&scriptTryCatch, true);
-                return scope.Close(Undefined());
+                Utilities::HandleException(&scriptTryCatch);
+                return scriptTryCatch.ReThrow();
             }
         }
 

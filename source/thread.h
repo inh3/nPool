@@ -52,6 +52,7 @@ typedef struct THREAD_WORK_ITEM_STRUCT
 
     // indicates error
     bool                    isError;
+    char*                   jsException;
 
 } THREAD_WORK_ITEM;
 

@@ -37,7 +37,7 @@ class Utilities
         static const char*  ReadFile(const char* fileName, int* fileSize);
 
         // exception handler
-        static void         HandleException(TryCatch* tryCatch, bool throwException);
+        static char*        HandleException(TryCatch* tryCatch, bool createExceptionObject = false);
 
         // print object properties
         static void         PrintObjectProperties(Handle<Object> objectHandle);

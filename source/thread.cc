@@ -242,7 +242,7 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
             // work failed to perform successfully
             if(workResult.IsEmpty() || tryCatch.HasCaught())
             {
-                Utilities::HandleException(&tryCatch, false);
+                workItem->jsException = Utilities::HandleException(&tryCatch, true);
                 workItem->isError = true;
             }
             // work performed successfully
@@ -348,12 +348,13 @@ Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_
         IsolateContext::UpdateContextFileProperties(globalContext, workFileInfo);
 
         // compile the source code
-        Handle<Script> script = Script::Compile(String::New(workFileInfo->fileBuffer));
+        ScriptOrigin scriptOrigin(String::New(workFileInfo->fileName));
+        Handle<Script> script = Script::Compile(String::New(workFileInfo->fileBuffer), &scriptOrigin);
 
         // check for exception on compile
         if(script.IsEmpty() || tryCatch.HasCaught())
         {
-            Utilities::HandleException(&tryCatch, false);
+            workItem->jsException = Utilities::HandleException(&tryCatch, true);
             workItem->isError = true;
         }
         // no exception
@@ -365,7 +366,7 @@ Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_
             // throw exception if script failed to run properly
             if(scriptResult.IsEmpty() || tryCatch.HasCaught())
             {
-                Utilities::HandleException(&tryCatch, false);
+                workItem->jsException = Utilities::HandleException(&tryCatch, true);
                 workItem->isError = true;
             }
             else
@@ -412,6 +413,10 @@ void Thread::DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem)
     if(workItem->callbackObject != NULL)
     {
         free(workItem->callbackObject);
+    }
+    if(workItem->isError == true)
+    {
+        free(workItem->jsException);
     }
     if(freeWorkItem == true)
     {

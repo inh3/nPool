@@ -15,6 +15,7 @@
 
 // custom
 #include "synchronize.h"
+#include "json.h"
 
 char* Utilities::CreateCharBuffer(Handle<String> v8String)
 {
@@ -70,8 +71,11 @@ const char* Utilities::ReadFile(const char* fileName, int* fileSize)
 }
 
 // https://code.google.com/p/v8/source/browse/trunk/samples/shell.cc
-void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
+char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
 {
+    // return value
+    char* exceptionBuffer = NULL;
+
     // create scope for exception
     HandleScope handleScope;
 
@@ -86,7 +90,15 @@ void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
     if (exceptionMessage.IsEmpty())
     {
         // print the exception
-        fprintf(stderr, "[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
+        fprintf(stderr, "\n[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
+
+        // build exception object if required
+        if(createExceptionObject == true)
+        {
+            Handle<Object> exceptionObject = Object::New();
+            exceptionObject->Set(String::NewSymbol("message"), String::New(exceptionCharStr));
+            exceptionBuffer = JSON::Stringify(exceptionObject);
+        }
     } 
     // there was a valid message attached to the exception
     else
@@ -103,7 +115,7 @@ void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
         const char* sourceLineCharStr = Utilities::ToCString(sourceLineString);
 
         // print the exception
-        fprintf(stderr, "[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
+        fprintf(stderr, "\n[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
         fprintf(stderr, "[ File: %s ] [ Line Num: %i ]\n", fileNameCharStr, lineNum);
         fprintf(stderr, "%s\n", sourceLineCharStr);
 
@@ -126,13 +138,24 @@ void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
             const char* stackTraceCharStr = Utilities::ToCString(stackTraceString);
             fprintf(stderr, "%s\n", stackTraceCharStr);
         }
+
+        // build exception object if required
+        if(createExceptionObject == true)
+        {
+            Handle<Object> exceptionObject = Object::New();
+            exceptionObject->Set(String::NewSymbol("message"), String::New(exceptionCharStr));
+            exceptionObject->Set(String::NewSymbol("lineNum"), Number::New(lineNum));
+            exceptionObject->Set(String::NewSymbol("sourceLine"), String::New(sourceLineCharStr));
+            if(!tryCatch->StackTrace().IsEmpty())
+            {
+                exceptionObject->Set(String::NewSymbol("stackTrace"), tryCatch->StackTrace());
+            }
+
+            exceptionBuffer = JSON::Stringify(exceptionObject);
+        }
     }
 
-    // throw exceptio if requested
-    if(throwException == true)
-    {
-        tryCatch->ReThrow();
-    }
+    return exceptionBuffer;
 }
 
 void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
