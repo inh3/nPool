@@ -79,76 +79,40 @@ char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
     // create scope for exception
     HandleScope handleScope;
 
-    // get the exception string
-    String::Utf8Value exceptionString(tryCatch->Exception());
-    const char* exceptionCharStr = Utilities::ToCString(exceptionString);
-
     // get the exception message
     Handle<Message> exceptionMessage = tryCatch->Message();
 
     // the exception message was not valid
     if (exceptionMessage.IsEmpty())
     {
-        // print the exception
-        fprintf(stderr, "\n[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
-
         // build exception object if required
         if(createExceptionObject == true)
         {
             Handle<Object> exceptionObject = Object::New();
-            exceptionObject->Set(String::NewSymbol("message"), String::New(exceptionCharStr));
+            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Exception());
             exceptionBuffer = JSON::Stringify(exceptionObject);
         }
     } 
     // there was a valid message attached to the exception
     else
     {
-        // get file-name from the message
-        v8::String::Utf8Value fileNameString(exceptionMessage->GetScriptResourceName());
-        const char* fileNameCharStr = Utilities::ToCString(fileNameString);
-
-        // get line-number of the exception
-        int lineNum = exceptionMessage->GetLineNumber();
-
-        // get the line of code
-        v8::String::Utf8Value sourceLineString(exceptionMessage->GetSourceLine());
-        const char* sourceLineCharStr = Utilities::ToCString(sourceLineString);
-
-        // print the exception
-        fprintf(stderr, "\n[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
-        fprintf(stderr, "[ File: %s ] [ Line Num: %i ]\n", fileNameCharStr, lineNum);
-        fprintf(stderr, "%s\n", sourceLineCharStr);
-
-        // print indicator at point of exception on source line
-        int start = exceptionMessage->GetStartColumn();
-        for (int i = 0; i < start; i++) {
-            fprintf(stderr, " ");
-        }
-        int end = exceptionMessage->GetEndColumn();
-        for (int i = start; i < end; i++) {
-            fprintf(stderr, "^");
-        }
-        fprintf(stderr, "\n");
-
-        // print the stack trace
-        v8::String::Utf8Value stackTraceString(tryCatch->StackTrace());
-        if (stackTraceString.length() > 0)
-        {
-            fprintf(stderr, "[ Stack Trace ]\n");
-            const char* stackTraceCharStr = Utilities::ToCString(stackTraceString);
-            fprintf(stderr, "%s\n", stackTraceCharStr);
-        }
-
         // build exception object if required
         if(createExceptionObject == true)
         {
             Handle<Object> exceptionObject = Object::New();
-            exceptionObject->Set(String::NewSymbol("message"), String::New(exceptionCharStr));
-            exceptionObject->Set(String::NewSymbol("lineNum"), Number::New(lineNum));
-            exceptionObject->Set(String::NewSymbol("sourceLine"), String::New(sourceLineCharStr));
+
+            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Message()->Get());
+            exceptionObject->Set(String::NewSymbol("resourceName"), exceptionMessage->GetScriptResourceName());
+            exceptionObject->Set(String::NewSymbol("lineNum"), Number::New(exceptionMessage->GetLineNumber()));
+            exceptionObject->Set(String::NewSymbol("sourceLine"), exceptionMessage->GetSourceLine());
+            exceptionObject->Set(String::NewSymbol("scriptData"), exceptionMessage->GetScriptData());
             if(!tryCatch->StackTrace().IsEmpty())
             {
                 exceptionObject->Set(String::NewSymbol("stackTrace"), tryCatch->StackTrace());
+            }
+            else
+            {
+                exceptionObject->Set(String::NewSymbol("stackTrace"), Null());
             }
 
             exceptionBuffer = JSON::Stringify(exceptionObject);

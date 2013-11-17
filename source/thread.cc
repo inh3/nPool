@@ -300,27 +300,29 @@ void Thread::uvAsyncCallback(uv_async_t* handle, int status)
     THREAD_WORK_ITEM* workItem = 0;
     while((workItem = callbackQueue->GetWorkItem()) != 0)
     {
-        // work executed successfully
-        if(workItem->isError == false)
+        Handle<Value> callbackObject = Null();
+        Handle<Value> exceptionObject = Null();
+
+        // parse exception if one is present
+        if(workItem->isError == true)
         {
-            // parse stringified result
-            Handle<Value> callbackObject = JSON::Parse(workItem->callbackObject);
-
-            //create arguments array
-            const unsigned argc = 2;
-            Handle<Value> argv[argc] = { callbackObject, Number::New(workItem->workId) };
-
-            // make callback on node thread
-            workItem->callbackFunction->Call(workItem->callbackContext, argc, argv);
-
-            // clean up memory and dispose of persistent references
-            Thread::DisposeWorkItem(workItem, true);
+            exceptionObject = JSON::Parse(workItem->jsException);
         }
-        // work failed to get executed
         else
         {
-            Thread::DisposeWorkItem(workItem, true);
+            // parse stringified result
+            callbackObject = JSON::Parse(workItem->callbackObject);
         }
+
+        //create arguments array
+        const unsigned argc = 3;
+        Handle<Value> argv[argc] = { callbackObject, Number::New(workItem->workId), exceptionObject };
+
+        // make callback on node thread
+        workItem->callbackFunction->Call(workItem->callbackContext, argc, argv);
+
+        // clean up memory and dispose of persistent references
+        Thread::DisposeWorkItem(workItem, true);
     }
 }
 
