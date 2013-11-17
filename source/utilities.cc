@@ -86,7 +86,7 @@ void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
     if (exceptionMessage.IsEmpty())
     {
         // print the exception
-        fprintf(stderr, "[ %u ] EXCEPTION - [ Message: %s ]\n", SyncGetThreadId(), exceptionCharStr);
+        fprintf(stderr, "[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
     } 
     // there was a valid message attached to the exception
     else
@@ -103,7 +103,7 @@ void Utilities::HandleException(TryCatch* tryCatch, bool throwException)
         const char* sourceLineCharStr = Utilities::ToCString(sourceLineString);
 
         // print the exception
-        fprintf(stderr, "[ %u ] EXCEPTION - [ Message: %s ]\n", SyncGetThreadId(), exceptionCharStr);
+        fprintf(stderr, "[ EXCEPTION - Message: %s ]\n", exceptionCharStr);
         fprintf(stderr, "[ File: %s ] [ Line Num: %i ]\n", fileNameCharStr, lineNum);
         fprintf(stderr, "%s\n", sourceLineCharStr);
 
