@@ -26,8 +26,13 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 	Local<String> v8FileName = (args[0])->ToString();
 	String::AsciiValue fileName(v8FileName);
 
+    // get handle to directory of current executing script
+    Handle<Object> contextObject = Context::GetCalling()->Global();
+    Handle<String> dirNameHandle = contextObject->Get(String::NewSymbol("__dirname"))->ToString();
+    String::Utf8Value __dirname(dirNameHandle);
+
 	// allocate file buffer
-    const FILE_INFO* fileInfo = Utilities::GetFileInfo(*fileName);
+    const FILE_INFO* fileInfo = Utilities::GetFileInfo(*fileName, *__dirname);
 
     // file was invalid
     if(fileInfo->fileBuffer == 0)

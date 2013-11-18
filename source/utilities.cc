@@ -1,5 +1,8 @@
 #include "utilities.h"
 
+// C++
+#include <string>
+
 // C
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,32 +136,44 @@ void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
     }
 }
 
-FILE_INFO* Utilities::GetFileInfo(const char* relativePath)
+FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentDirectory)
 {
     // return value
     FILE_INFO* fileInfo = (FILE_INFO*)malloc(sizeof(FILE_INFO));
     memset(fileInfo, 0, sizeof(FILE_INFO));
+
+    // check if relative path should be combined with current directory
+    std::string filePath(relativePath);
+    if((currentDirectory != NULL) && (strlen(relativePath) > 2))
+    {
+        // combine current directory to relative path if it starts with './' or '../'
+        if(((relativePath[0] == '.') && ((relativePath[1] == '\\') || (relativePath[1] == '/'))) ||
+            (relativePath[0] == '.' && relativePath[1] == '.' && ((relativePath[2] == '\\') || (relativePath[2] == '/'))))
+        {
+            filePath.insert(0, currentDirectory);
+        }
+    }
 
     // get the full path of the file
     #ifdef _WIN32
         // http://msdn.microsoft.com/en-us/library/506720ff.aspx
         fileInfo->fullPath = (const char*)malloc(_MAX_PATH);
         memset((void*)fileInfo->fullPath, 0, _MAX_PATH);
-        _fullpath((char*)fileInfo->fullPath, relativePath, _MAX_PATH);
+        _fullpath((char*)fileInfo->fullPath, filePath.c_str(), _MAX_PATH);
         
-        // http://msdn.microsoft.com/en-us/library/1w06ktdy.aspx
-        if((_access((char*)fileInfo->fullPath, 0 )) == -1)
+        // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
+        if((_access_s((char*)fileInfo->fullPath, 0 )) == -1)
         {
-            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }
     #else
         fileInfo->fullPath = (char*)malloc(PATH_MAX);
         memset((void*)fileInfo->fullPath, 0, PATH_MAX);
-        if(realpath(relativePath, (char *)fileInfo->fullPath) == NULL)
+        if(realpath(filePath.c_str(), (char *)fileInfo->fullPath) == NULL)
         {
-            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", relativePath);
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }

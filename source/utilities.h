@@ -43,7 +43,7 @@ class Utilities
         static void         PrintObjectProperties(Handle<Object> objectHandle);
 
         // get file name and directory from path
-        static FILE_INFO*   GetFileInfo(const char* relativePath);
+        static FILE_INFO*   GetFileInfo(const char* relativePath, const char* currentDirectory = NULL);
 
         // free file info that was created from GetFileInfo
         static void         FreeFileInfo(const FILE_INFO* fileInfo);
