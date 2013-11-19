@@ -162,7 +162,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
         _fullpath((char*)fileInfo->fullPath, filePath.c_str(), _MAX_PATH);
         
         // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
-        if((_access_s((char*)fileInfo->fullPath, 0 )) == -1)
+        if((_access_s((char*)fileInfo->fullPath, 0)) != 0)
         {
             //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
