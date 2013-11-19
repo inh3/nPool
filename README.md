@@ -70,11 +70,11 @@ A reference implementation is provided with the source in the [`./example`](http
 
 nPool provides a very simple and efficient interface.  Currently, there are a total of five functions:
 
-1. [`createThreadPool`] (#createthreadpool)
-2. [`destroyThreadPool`] (#destroythreadpool)
-3. [`loadFile`] (#loadfile)
-4. [`removeFile`] (#removefile)
-5. [`queueWork`] (#queuework)
+1. [`createThreadPool`](#createthreadpool)
+2. [`destroyThreadPool`](#destroythreadpool)
+3. [`loadFile`](#loadfile)
+4. [`removeFile`](#removefile)
+5. [`queueWork`](#queuework)
 
 **Example:**
 ```js
