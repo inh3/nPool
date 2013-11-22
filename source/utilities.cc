@@ -157,8 +157,8 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
     // get the full path of the file
     #ifdef _WIN32
         // http://msdn.microsoft.com/en-us/library/506720ff.aspx
-        fileInfo->fullPath = (const char*)malloc(_MAX_PATH);
-        memset((void*)fileInfo->fullPath, 0, _MAX_PATH);
+        fileInfo->fullPath = (const char*)malloc(_MAX_PATH + 1);
+        memset((void*)fileInfo->fullPath, 0, _MAX_PATH + 1);
         _fullpath((char*)fileInfo->fullPath, filePath.c_str(), _MAX_PATH);
         
         // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
@@ -169,8 +169,8 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
             fileInfo->fullPath = 0;
         }
     #else
-        fileInfo->fullPath = (char*)malloc(PATH_MAX);
-        memset((void*)fileInfo->fullPath, 0, PATH_MAX);
+        fileInfo->fullPath = (char*)malloc(PATH_MAX + 1);
+        memset((void*)fileInfo->fullPath, 0, PATH_MAX + 1);
         if(realpath(filePath.c_str(), (char *)fileInfo->fullPath) == NULL)
         {
             //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
