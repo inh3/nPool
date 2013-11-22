@@ -1,7 +1,6 @@
 // object type function prototype
 var ExceptionModule = function () {
 
-    // private function
     this.exceptionFunction = function (workParam) {
         var x = null;
         return {

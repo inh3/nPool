@@ -5,7 +5,6 @@ var CompileErrorModule = function () {
         return "This will fail to compile"!;
     }
 
-    // private function
     this.compileErrorFunction = function (workParam) {
         return {
             resultString: willFailToCompile();

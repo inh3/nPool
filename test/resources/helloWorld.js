@@ -1,7 +1,6 @@
 // object type function prototype
 var HelloWorld = function () {
 
-    // private function
     this.sayHelloWorld = function (workParam) {
         return {
             resultString: "Hello World " + workParam.testString

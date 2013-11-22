@@ -4,7 +4,6 @@ var subModuleContext = new SubModuleContext();
 // object type function prototype
 var ModuleContextBase = function () {
 
-    // private function
     this.checkModuleContext = function (workParam) {
 
         return {

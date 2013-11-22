@@ -4,7 +4,6 @@ var exceptionModule = new ExceptionModule();
 // object type function prototype
 var ExceptionParentModule = function () {
 
-    // private function
     this.exceptionParentFunction = function (workParam) {
         return {
             exceptionResult: exceptionModule.exceptionFunction()

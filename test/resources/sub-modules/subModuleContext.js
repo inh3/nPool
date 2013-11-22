@@ -1,7 +1,6 @@
 // object type function prototype
 var SubModuleContext = function () {
 
-    // private function
     this.checkModuleContext = function (workParam) {
 
         global["subModuleSetThis"] = true;
