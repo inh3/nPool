@@ -14,7 +14,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Use of object types to complete units of work
  * Support for UTF-8 strings
  * Exception and error handling within background threads
- * Node.js global object support within background threads
+ * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
  * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
 
