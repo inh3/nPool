@@ -270,7 +270,7 @@ The work complete callback function takes two parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
   * `exceptionObject` *object* -  the object that contains exception information
-    - This is null if no exceptions occured during work
+    - This is `null` if no exceptions occured during work
     - This object contains the following properties:
         - `message` *string* - the exception message (always present)
         - `resourceName` *string* - name of the file where the exception occured (not always present depending on error)
