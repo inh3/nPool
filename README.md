@@ -82,7 +82,7 @@ nPool provides a very simple and efficient interface.  Currently, there are a to
 var nPool = require('npool');
 
 // work complete callback from thread pool 
-var callbackFunction = function (callbackObject, workId) { ... }
+var callbackFunction = function (callbackObject, workId, exceptionObject) { ... }
 
 // load files defining object types
 nPool.loadFile(1, './objectType.js');
@@ -166,13 +166,13 @@ This function takes two parameters:
  * `fileKey` *uint32* - uniquely identifies a file
  * `filePath` *string* - path to javascript file to be cached
 
-Each file must have a unique key.
+Each file must have a unique key.  Also, it is important that the full path to the javascript file is provided.  The best practice is to use __dirname in addition to the relative path to the file.
 
 **Example:**
 
 ```js
 // load files defining object types
-nPool.loadFile(1, './objectType.js');
+nPool.loadFile(1, __dirname + './objectType.js');
 ```
 
 Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object is used as a service and should be stateless.
@@ -263,6 +263,7 @@ A `unitOfWorkObject` contains the following named properties:
 The work complete callback function takes two parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
+  * `exceptionObject` *object* -  the object that contains exception information (this is null if no exceptions occured during work)
 
  * `callbackContext` *context* - This property specifies the context (`this`) of the `callbackFunction` when it is called.
 
@@ -308,7 +309,8 @@ nPool emulates the Node.js module system for loaded files.  The module loading s
 The emulated module loading system has the following features/limitations:
 
 * Similar 'require(...)' syntax as Node.js
- * Relative path and full file-name must be specified
+ * Currently only file-based requiring is supported.  Future support for directories and node_module sourcing is planned.
+ * Paths that start with './' and '../' will automatically resolve relative to the file that is performing the require()
 * Limited to pure Javascript modules
  * No native or compiled add-ons
 * Supports nested modules
@@ -318,8 +320,9 @@ The reference implementation provided with the source ([`./example`](https://git
 
 ## Future Development
 
-1. Multiple thread pools per Node.js process
-2. Comprehensive error and exception handling
+1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding for native add-ons).
+2. Event based notification and completion mechanism (ie. could be used to indicate progress of task).
+3. Multiple thread pools per Node.js process
 
 ## License
 
@@ -342,7 +345,7 @@ modification, are permitted provided that the following conditions are met:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL IVAN HALL BE LIABLE FOR ANY
+DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
