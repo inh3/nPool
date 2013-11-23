@@ -14,7 +14,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Use of object types to complete units of work
  * Support for UTF-8 strings
  * Exception and error handling within background threads
- * Node.js global object support (console.log, __filename, __dirname, require)
+ * Node.js global object support within background threads (`console.log`, `__filename`, `__dirname`, `require`)
  * Validated with a comprehensive mocha test suite
 
 ## Table of Contents
@@ -169,7 +169,9 @@ This function takes two parameters:
  * `fileKey` *uint32* - uniquely identifies a file
  * `filePath` *string* - path to javascript file to be cached
 
-Each file must have a unique key.  Also, it is important that the full path to the javascript file is provided.  The best practice is to use __dirname in addition to the relative path to the file.
+Each file must have a unique key.
+
+Also, it is important that the full path to the javascript file is provided.  The best practice is to use `__dirname` in addition to the relative path to the file.
 
 **Example:**
 
@@ -266,7 +268,8 @@ A `unitOfWorkObject` contains the following named properties:
 The work complete callback function takes two parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
-  * `exceptionObject` *object* -  the object that contains exception information (this is null if no exceptions occured during work)
+  * `exceptionObject` *object* -  the object that contains exception information
+    - This is null if no exceptions occured during work
     - This object contains the following properties:
         - `message` *string* - the exception message (always present)
         - `resourceName` *string* - name of the file where the exception occured (not always present depending on error)
