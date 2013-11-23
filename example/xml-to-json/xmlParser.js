@@ -1,5 +1,5 @@
-var DOMParser = require(__dirname + './dom-parser.js').DOMParser;
-var XML2JSON = require(__dirname + './xml2json.js');
+var DOMParser = require('./dom-parser.js').DOMParser;
+var XML2JSON = require('./xml2json.js');
 
 function XMLParser () {
 

@@ -1,5 +1,5 @@
 // utilize a node.js like require
-var _ = require('./underscore.js');
+var _ = require(__dirname + './underscore.js');
 
 var ApplesOranges = function() {
 

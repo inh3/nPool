@@ -9,7 +9,7 @@ catch (e) {
 
 
 // work complete callback from thread pool 
-var fibonacciCallbackFunction = function (callbackObject, workId) {
+var fibonacciCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -21,13 +21,18 @@ var fibonacciCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
 };
 
 // work complete callback from thread pool 
-var helloWorldCallbackFunction = function (callbackObject, workId) {
+var helloWorldCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -39,13 +44,18 @@ var helloWorldCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
 };
 
 // work complete callback from thread pool 
-var applesOrangesCallbackFunction = function (callbackObject, workId) {
+var applesOrangesCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -57,9 +67,14 @@ var applesOrangesCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
 };
 
 // object type to be used to demonstrate context param within unit of work
@@ -84,9 +99,10 @@ function ContextC() {
 }
 
 // load files defining object types
-nPool.loadFile(1, './fibonacciNumber.js');
-nPool.loadFile(2, './helloWorld.js');
-nPool.loadFile(3, './applesOranges.js');
+nPool.loadFile(1, __dirname + '/fibonacciNumber.js');
+nPool.loadFile(2, __dirname + '/helloWorld.js');
+nPool.loadFile(3, __dirname + '/applesOranges.js');
+nPool.loadFile(4, __dirname + '/badScript.js');
 
 // create thread pool with two threads
 nPool.createThreadPool(2);
@@ -142,6 +158,19 @@ for(var workCount = 0; workCount < 10; workCount++) {
         unitOfWork.callbackFunction = helloWorldCallbackFunction;
         unitOfWork.callbackContext = ContextBObject
 
+    }
+
+    // queue some other work on a special condition
+    if(workCount == 4) {
+        unitOfWork.workId = 666;
+        unitOfWork.fileKey = 4;
+        unitOfWork.workFunction = "someFunction";
+        unitOfWork.workParam = {
+            myProp: "property"
+        };
+
+        unitOfWork.callbackFunction = helloWorldCallbackFunction;
+        unitOfWork.callbackContext = ContextBObject
     }
 
     // this utilizes the node.js like module loading system

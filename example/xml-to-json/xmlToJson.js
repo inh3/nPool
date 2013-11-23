@@ -20,7 +20,7 @@ var unitOfWork = {
     fileKey: 1,
     workFunction: 'parseXmlData',
     workParam: {
-        xmlData: '<key>value</key>'
+        xmlData: "<note><script/><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
     },
 
     callbackFunction: workCallback,
@@ -43,7 +43,7 @@ var count = 0;
     startTime = (new Date()).getTime();
 
     // continue for ~5 seconds
-    if(count++ < 20) {
+    if(count++ < 40) {
         setTimeout(spinForever, 250);
     }
     else {
@@ -53,11 +53,18 @@ var count = 0;
 })();
 
 // work function callback
-function workCallback(parsedObject, workId) {
-    // time spent queueing work
-    var totalTime = (new Date()).getTime() - startTime;
-    console.log("[ Work Completed - " + totalTime + " ms ]");
+function workCallback(parsedObject, workId, exceptionObject) {
 
-    console.log('workCallback: ' + workId);
-    console.log(parsedObject);
+    if(exceptionObject == null) {
+        // time spent queueing work
+        var totalTime = (new Date()).getTime() - startTime;
+        console.log("[ Work Completed - " + totalTime + " ms ]");
+
+        console.log('workCallback: ' + workId);
+        console.log(parsedObject);    
+    }
+    else {
+        console.log('exceptionObject:');
+        console.log(exceptionObject.stackTrace);
+    }
 }
