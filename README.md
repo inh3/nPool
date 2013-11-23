@@ -14,8 +14,9 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Use of object types to complete units of work
  * Support for UTF-8 strings
  * Exception and error handling within background threads
- * Node.js global object support within background threads (`console.log`, `__filename`, `__dirname`, `require`)
- * Validated with a comprehensive mocha test suite
+ * Node.js global object support within background threads
+   * `console.log`, `__filename`, `__dirname`, `require`
+ * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
 
 ## Table of Contents
 
@@ -332,7 +333,7 @@ nPool emulates the Node.js module system for loaded files.  The module loading s
 The emulated module loading system has the following features/limitations:
 
 * Similar 'require(...)' syntax as Node.js
- * Currently only file-based requiring is supported.  Future support for directories and node_module sourcing is planned.
+ * Currently only individual file-based require() is supported
  * Paths that start with './' and '../' will automatically resolve relative to the file that is performing the require()
 * Limited to pure Javascript modules
  * No native or compiled add-ons
