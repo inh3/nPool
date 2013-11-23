@@ -13,6 +13,9 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
  * Support for UTF-8 strings
+ * Exception and error handling within background threads
+ * Node.js global object support (console.log, __filename, __dirname, require)
+ * Validated with a comprehensive mocha test suite
 
 ## Table of Contents
 
