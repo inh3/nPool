@@ -267,6 +267,12 @@ The work complete callback function takes two parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
   * `exceptionObject` *object* -  the object that contains exception information (this is null if no exceptions occured during work)
+    - This object contains the following properties:
+        - `message` *string* - the exception message (always present)
+        - `resourceName` *string* - name of the file where the exception occured (not always present depending on error)
+        - `lineNum` *uint32* - line number within the resource where the exception occured (not always present depending on error)
+        - `sourceLine` *string* - line of code within resource where the exception occured (not always present depending on error)
+        - `stackTrace` *string* - string format of stack trace (includes '\n's) of the exception (not always present depending on error)
 
  * `callbackContext` *context* - This property specifies the context (`this`) of the `callbackFunction` when it is called.
 
@@ -274,6 +280,17 @@ The work complete callback function takes two parameters:
 
 ```js
 // create the unit of work object
+function myCallbackFunction(callbackObject, workId, exceptionObject) {
+    if(exceptionObject == null) {
+        // work was performed successfully
+        ...
+    }
+    else {
+        // exception or error occured during work
+        console.log(exceptionObject);
+    }
+}
+
 var unitOfWork = {
 
 		// unique identifer of unit of work
@@ -294,7 +311,7 @@ var unitOfWork = {
 		},
 
 		// function that will be called on main Node.js when the task is complete
-		callbackFunction: fibonacciCallbackFunction,
+		callbackFunction: myCallbackFunction,
 
 		// context that the callbackFunction will be called in
 		callbackContext: someOtherObject
