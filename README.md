@@ -8,7 +8,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
  * Linux, Mac and Windows support
  * Efficient and straightforward interface
- * Emulated Node.js module loading system within threads
+ * Emulated [Node.js module](http://nodejs.org/api/modules.html#modules_modules) loading system within threads
  * Transparent marshalling of Javascript objects in and out of the thread pool
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
