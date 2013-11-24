@@ -328,13 +328,13 @@ nPool.queueWork(unitOfWork);
 
 ## Thread Module Support
 
-nPool emulates the Node.js module system for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
+nPool emulates the [Node.js module system](http://nodejs.org/api/modules.html#modules_modules) for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
 
 The emulated module loading system has the following features/limitations:
 
-* Similar 'require(...)' syntax as Node.js
+* Similar `require(...)` syntax as Node.js
  * Currently only individual file-based require() is supported
- * Paths that start with './' and '../' will automatically resolve relative to the file that is performing the require()
+ * Paths that start with `./` and `../` automatically resolve relative to the file performing the `require()`
 * Limited to pure Javascript modules
  * No native or compiled add-ons
 * Supports nested modules
