@@ -340,6 +340,22 @@ The emulated module loading system has the following features/limitations:
 * Supports nested modules
  * Required module requiring other modules
 
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require('./aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/aModule.js'
+var TheModule = require('../aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require(__dirname + '/aModule.js');
+```
+
 The reference implementation provided with the source ([`./example`](https://github.com/inh3/nPool/tree/master/example)) demonstrates the emulated module loading mechanism.
 
 ## Future Development
