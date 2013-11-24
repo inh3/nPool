@@ -360,7 +360,7 @@ The reference implementation provided with the source ([`./example`](https://git
 
 ## Future Development
 
-1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding for native add-ons).
+1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding native add-ons).
 2. Event based notification and completion mechanism (ie. could be used to indicate progress of task).
 3. Multiple thread pools per Node.js process
 
