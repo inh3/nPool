@@ -1,14 +1,15 @@
 // load appropriate npool module
+var nPool = null;
 try {
-    var nPool = require('./../build/Release/npool');
+    nPool = require('./../build/Release/npool');
 }
 catch (e) {
-    var nPool = require('./../build/Debug/npool');
+    nPool = require('./../build/Debug/npool');
 }
 
 
 // work complete callback from thread pool 
-var fibonacciCallbackFunction = function (callbackObject, workId) {
+var fibonacciCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -20,13 +21,18 @@ var fibonacciCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
-}
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
+};
 
 // work complete callback from thread pool 
-var helloWorldCallbackFunction = function (callbackObject, workId) {
+var helloWorldCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -38,13 +44,18 @@ var helloWorldCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
-}
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
+};
 
 // work complete callback from thread pool 
-var applesOrangesCallbackFunction = function (callbackObject, workId) {
+var applesOrangesCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
 
@@ -56,36 +67,42 @@ var applesOrangesCallbackFunction = function (callbackObject, workId) {
 
     console.log("WorkId: " + workId + "\n");
 
-    console.log("Callback Object:");
-    console.log(callbackObject);
-    console.log("");
-}
+    if(exceptionObject == null) {
+        console.log("Callback Object:");
+        console.log(callbackObject);
+        console.log("");
+    }
+    else {
+        console.log(exceptionObject);
+    }
+};
 
 // object type to be used to demonstrate context param within unit of work
 function ContextA() {
 
-    this.contextAProperty = "[Context A] Property",
+    this.contextAProperty = "[Context A] Property";
     this.contextAFunction = function() { console.log("[Context A] Function"); }
 }
 
 // object type to be used to demonstrate context param within unit of work
 function ContextB() {
 
-    this.contextBProperty = "[Context B] Property",
+    this.contextBProperty = "[Context B] Property";
     this.contextBFunction = function() { console.log("[Context B] Function"); }
 }
 
 // object type to be used to demonstrate context param within unit of work
 function ContextC() {
 
-    this.contextCProperty = "[Context C] Property",
+    this.contextCProperty = "[Context C] Property";
     this.contextCFunction = function() { console.log("[Context C] Function"); }
 }
 
 // load files defining object types
-nPool.loadFile(1, './fibonacciNumber.js');
-nPool.loadFile(2, './helloWorld.js');
-nPool.loadFile(3, './applesOranges.js');
+nPool.loadFile(1, __dirname + '/fibonacciNumber.js');
+nPool.loadFile(2, __dirname + '/helloWorld.js');
+nPool.loadFile(3, __dirname + '/applesOranges.js');
+nPool.loadFile(4, __dirname + '/badScript.js');
 
 // create thread pool with two threads
 nPool.createThreadPool(2);
@@ -113,7 +130,7 @@ var count = 0;
 })();
 
 // add 6 units of work to thread pool queue
-for(var workCount = 0; workCount < 7; workCount++) {
+for(var workCount = 0; workCount < 10; workCount++) {
 
     // create the unit of work object
     var unitOfWork = {
@@ -126,7 +143,7 @@ for(var workCount = 0; workCount < 7; workCount++) {
 
         callbackFunction: fibonacciCallbackFunction,
         callbackContext: ContextAObject
-    }
+    };
 
     // queue some other work on a special condition
     if(workCount == 3) {
@@ -143,6 +160,19 @@ for(var workCount = 0; workCount < 7; workCount++) {
 
     }
 
+    // queue some other work on a special condition
+    if(workCount == 4) {
+        unitOfWork.workId = 666;
+        unitOfWork.fileKey = 4;
+        unitOfWork.workFunction = "someFunction";
+        unitOfWork.workParam = {
+            myProp: "property"
+        };
+
+        unitOfWork.callbackFunction = helloWorldCallbackFunction;
+        unitOfWork.callbackContext = ContextBObject
+    }
+
     // this utilizes the node.js like module loading system
     // for pure javascript modules
     if(workCount == 6) {
@@ -150,7 +180,20 @@ for(var workCount = 0; workCount < 7; workCount++) {
         unitOfWork.fileKey = 3;
         unitOfWork.workFunction = "getFruitNames";
         unitOfWork.workParam = {
-            fruitArray: [ { name: "apple", color: "red"}, { name: "strawberry", color: "red" }, { name: "banana", color: "yellow" } ]
+            fruitArray: [
+                {
+                    name: "apple",
+                    color: "red"
+                },
+                {
+                    name: "strawberry",
+                    color: "red"
+                },
+                {
+                    name: "banana",
+                    color: "yellow"
+                }
+            ]
         };
 
         unitOfWork.callbackFunction = applesOrangesCallbackFunction;

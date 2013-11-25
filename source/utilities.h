@@ -1,24 +1,52 @@
 #ifndef _UTILITIES_H_
 #define _UTILITIES_H_
 
+// C++
+#include <string>
+
 // node
 #include <node.h>
 #include <v8.h>
 using namespace v8;
 
+typedef struct FILE_INFO_STRUCT
+{
+    const char*             fileName;
+
+    const char*             folderPath;
+
+    const char*             fullPath;
+
+    const char*             fileBuffer;
+
+    int                     fileBufferLength;
+
+} FILE_INFO;
+
 class Utilities
 {
     public:
         
-        // char* utilities
+        // create a standard ascii char*
         static char*        CreateCharBuffer(Handle<String> v8String);
 
-        // Extracts a C string from a V8 Utf8Value.
+        // create a utf8 char*
         static const char*  ToCString(const String::Utf8Value& value);
 
-        // object traversal
-        static void         ParseObject(Handle<Object> v8Object);
-        static void         ParseArray(Handle<Array> v8Array);
+        // read file contents to char buffer
+        static const char*  ReadFile(const char* fileName, int* fileSize);
+
+        // exception handler
+        static char*        HandleException(TryCatch* tryCatch, bool createExceptionObject = false);
+
+        // print object properties
+        static void         PrintObjectProperties(Handle<Object> objectHandle);
+
+        // get file name and directory from path
+        static FILE_INFO*   GetFileInfo(const char* relativePath, const char* currentDirectory = NULL);
+
+        // free file info that was created from GetFileInfo
+        static void         FreeFileInfo(const FILE_INFO* fileInfo);
 };
 
 #endif /* _UTILITIES_H_ */

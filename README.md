@@ -8,11 +8,15 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
  * Linux, Mac and Windows support
  * Efficient and straightforward interface
- * Emulated Node.js module loading system within threads
+ * Emulated [Node.js module](http://nodejs.org/api/modules.html#modules_modules) loading system within threads
  * Transparent marshalling of Javascript objects in and out of the thread pool
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
  * Support for UTF-8 strings
+ * Exception and error handling within background threads
+ * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
+   * `console.log`, `__filename`, `__dirname`, `require`
+ * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
 
 ## Table of Contents
 
@@ -70,11 +74,11 @@ A reference implementation is provided with the source in the [`./example`](http
 
 nPool provides a very simple and efficient interface.  Currently, there are a total of five functions:
 
-1. [`createThreadPool`] (#createthreadpool)
-2. [`destroyThreadPool`] (#destroythreadpool)
-3. [`loadFile`] (#loadfile)
-4. [`removeFile`] (#removefile)
-5. [`queueWork`] (#queuework)
+1. [`createThreadPool`](#createthreadpool)
+2. [`destroyThreadPool`](#destroythreadpool)
+3. [`loadFile`](#loadfile)
+4. [`removeFile`](#removefile)
+5. [`queueWork`](#queuework)
 
 **Example:**
 ```js
@@ -82,7 +86,7 @@ nPool provides a very simple and efficient interface.  Currently, there are a to
 var nPool = require('npool');
 
 // work complete callback from thread pool 
-var callbackFunction = function (callbackObject, workId) { ... }
+var callbackFunction = function (callbackObject, workId, exceptionObject) { ... }
 
 // load files defining object types
 nPool.loadFile(1, './objectType.js');
@@ -168,11 +172,13 @@ This function takes two parameters:
 
 Each file must have a unique key.
 
+Also, it is important that the full path to the javascript file is provided.  The best practice is to use `__dirname` in addition to the relative path to the file.
+
 **Example:**
 
 ```js
 // load files defining object types
-nPool.loadFile(1, './objectType.js');
+nPool.loadFile(1, __dirname + './objectType.js');
 ```
 
 Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object is used as a service and should be stateless.
@@ -263,6 +269,14 @@ A `unitOfWorkObject` contains the following named properties:
 The work complete callback function takes two parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
+  * `exceptionObject` *object* -  the object that contains exception information
+    - This is `null` if no exceptions occured during work
+    - This object contains the following properties:
+        - `message` *string* - the exception message (always present)
+        - `resourceName` *string* - name of the file where the exception occured (not always present depending on error)
+        - `lineNum` *uint32* - line number within the resource where the exception occured (not always present depending on error)
+        - `sourceLine` *string* - line of code within resource where the exception occured (not always present depending on error)
+        - `stackTrace` *string* - string format of stack trace (includes '\n's) of the exception (not always present depending on error)
 
  * `callbackContext` *context* - This property specifies the context (`this`) of the `callbackFunction` when it is called.
 
@@ -270,6 +284,17 @@ The work complete callback function takes two parameters:
 
 ```js
 // create the unit of work object
+function myCallbackFunction(callbackObject, workId, exceptionObject) {
+    if(exceptionObject == null) {
+        // work was performed successfully
+        ...
+    }
+    else {
+        // exception or error occured during work
+        console.log(exceptionObject);
+    }
+}
+
 var unitOfWork = {
 
 		// unique identifer of unit of work
@@ -290,7 +315,7 @@ var unitOfWork = {
 		},
 
 		// function that will be called on main Node.js when the task is complete
-		callbackFunction: fibonacciCallbackFunction,
+		callbackFunction: myCallbackFunction,
 
 		// context that the callbackFunction will be called in
 		callbackContext: someOtherObject
@@ -303,23 +328,41 @@ nPool.queueWork(unitOfWork);
 
 ## Thread Module Support
 
-nPool emulates the Node.js module system for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
+nPool emulates the [Node.js module system](http://nodejs.org/api/modules.html#modules_modules) for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
 
 The emulated module loading system has the following features/limitations:
 
-* Similar 'require(...)' syntax as Node.js
- * Relative path and full file-name must be specified
+* Similar `require(...)` syntax as Node.js
+ * Currently only individual file-based require() is supported
+ * Paths that start with `./` and `../` automatically resolve relative to the file performing the `require()`
 * Limited to pure Javascript modules
  * No native or compiled add-ons
 * Supports nested modules
  * Required module requiring other modules
 
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require('./aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/aModule.js'
+var TheModule = require('../aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require(__dirname + '/aModule.js');
+```
+
 The reference implementation provided with the source ([`./example`](https://github.com/inh3/nPool/tree/master/example)) demonstrates the emulated module loading mechanism.
 
 ## Future Development
 
-1. Multiple thread pools per Node.js process
-2. Comprehensive error and exception handling
+1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding native add-ons).
+2. Event based notification and completion mechanism (ie. could be used to indicate progress of task).
+3. Multiple thread pools per Node.js process
 
 ## License
 
@@ -342,7 +385,7 @@ modification, are permitted provided that the following conditions are met:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL IVAN HALL BE LIABLE FOR ANY
+DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND

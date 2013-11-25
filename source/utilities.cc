@@ -1,9 +1,24 @@
 #include "utilities.h"
 
+// C++
+#include <string>
+
 // C
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+
+// FILE and fxxx()
+#ifndef _WIN32
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
+
+// custom
+#include "synchronize.h"
+#include "json.h"
 
 char* Utilities::CreateCharBuffer(Handle<String> v8String)
 {
@@ -21,74 +36,186 @@ const char* Utilities::ToCString(const String::Utf8Value& value)
     return *value ? *value : "<string conversion failed>";
 }
 
-void Utilities::ParseObject(Handle<Object> v8Object)
+const char* Utilities::ReadFile(const char* fileName, int* fileSize)
 {
-    // get object properties
-    Local<Array> v8ObjectProperties = v8Object->GetOwnPropertyNames();
-    for(uint32_t i = 0; i < v8ObjectProperties->Length(); i++)
-    {
-        // get property name
-        Local<String> propertyName = v8ObjectProperties->Get(i)->ToString();
-        String::AsciiValue propertyString(propertyName);
-        fprintf(stdout, "Utilities::ParseObject - Property: (%u) %s |", i, *propertyString);
+    // reference to c-string version of file
+    char *fileBuffer = 0;
 
-        // get property values
-        Local<Value> propertyValue = v8Object->Get(v8ObjectProperties->Get(i));
-        if(propertyValue->IsString())
+    // attempt to open the file
+    FILE* fd = fopen(fileName, "rb");
+
+    // clear file size
+    *fileSize = 0;
+
+    // file was valid
+    if(fd != 0)
+    {
+        // get size of file
+        fseek(fd, 0, SEEK_END);
+        *fileSize = ftell(fd);
+        rewind(fd);
+
+        // allocate file buffer for file contents
+        fileBuffer = (char*)malloc(*fileSize + 1);
+        fileBuffer[*fileSize] = 0;
+
+        // copy file contents
+        for (int charCount = 0; charCount < *fileSize;)
         {
-            Local<String> stringProperty = propertyValue->ToString();
-            String::AsciiValue value(stringProperty);
-            fprintf(stdout, " String: %s\n", *value);
+            int charRead = static_cast<int>(fread(&fileBuffer[charCount], 1, *fileSize - charCount, fd));
+            charCount += charRead;
         }
-        else if(propertyValue->IsNumber())
+
+        // close the file
+        fclose(fd);
+    }
+
+    return fileBuffer;
+}
+
+// https://code.google.com/p/v8/source/browse/trunk/samples/shell.cc
+char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
+{
+    // return value
+    char* exceptionBuffer = NULL;
+
+    // create scope for exception
+    HandleScope handleScope;
+
+    // get the exception message
+    Handle<Message> exceptionMessage = tryCatch->Message();
+
+    // the exception message was not valid
+    if (exceptionMessage.IsEmpty())
+    {
+        // build exception object if required
+        if(createExceptionObject == true)
         {
-            Local<Number> numberProperty = propertyValue->ToNumber();
-            uint32_t value = numberProperty->Value();
-            fprintf(stdout, " Number: %u\n", value);
+            Handle<Object> exceptionObject = Object::New();
+            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Exception());
+            exceptionBuffer = JSON::Stringify(exceptionObject);
         }
-        else if(propertyValue->IsFunction())
+    } 
+    // there was a valid message attached to the exception
+    else
+    {
+        // build exception object if required
+        if(createExceptionObject == true)
         {
-            fprintf(stdout, " Function\n");
+            Handle<Object> exceptionObject = Object::New();
+
+            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Message()->Get());
+            exceptionObject->Set(String::NewSymbol("resourceName"), exceptionMessage->GetScriptResourceName());
+            exceptionObject->Set(String::NewSymbol("lineNum"), Number::New(exceptionMessage->GetLineNumber()));
+            exceptionObject->Set(String::NewSymbol("sourceLine"), exceptionMessage->GetSourceLine());
+            exceptionObject->Set(String::NewSymbol("scriptData"), exceptionMessage->GetScriptData());
+            if(!tryCatch->StackTrace().IsEmpty())
+            {
+                exceptionObject->Set(String::NewSymbol("stackTrace"), tryCatch->StackTrace());
+            }
+            else
+            {
+                exceptionObject->Set(String::NewSymbol("stackTrace"), Null());
+            }
+
+            exceptionBuffer = JSON::Stringify(exceptionObject);
         }
-        else if(propertyValue->IsArray())
-        {
-            Utilities::ParseArray(Local<Array>::Cast(propertyValue));
-        }
-        else if(propertyValue->IsObject())
-        {
-            Utilities::ParseObject(propertyValue->ToObject());
-        }
-        else
-        {
-            fprintf(stdout, "\n");
-        }
+    }
+
+    return exceptionBuffer;
+}
+
+void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
+{
+    Local<Array> propertyKeys = (*objectHandle)->GetPropertyNames();
+    for (uint32_t keyIndex = 0; keyIndex < propertyKeys->Length(); keyIndex++)
+    {
+        Handle<v8::String> keyString = propertyKeys->Get(keyIndex)->ToString();
+        String::AsciiValue propertyName(keyString);
+        fprintf(stdout, "[ Property %u ] %s\n", keyIndex, *propertyName);
     }
 }
 
-void Utilities::ParseArray(Handle<Array> v8Array)
+FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentDirectory)
 {
-    fprintf(stdout, " Array:\n");
-    for(uint32_t idx = 0; idx < v8Array->Length(); idx++)
-    {
-        fprintf(stdout, "\t%u) ", idx);
+    // return value
+    FILE_INFO* fileInfo = (FILE_INFO*)malloc(sizeof(FILE_INFO));
+    memset(fileInfo, 0, sizeof(FILE_INFO));
 
-        Handle<Value> arrayValue = v8Array->Get(idx);
-        if(arrayValue->IsString())
+    // check if relative path should be combined with current directory
+    std::string filePath(relativePath);
+    if((currentDirectory != NULL) && (strlen(relativePath) > 2))
+    {
+        // combine current directory to relative path if it starts with './' or '../'
+        if(((relativePath[0] == '.') && ((relativePath[1] == '\\') || (relativePath[1] == '/'))) ||
+            (relativePath[0] == '.' && relativePath[1] == '.' && ((relativePath[2] == '\\') || (relativePath[2] == '/'))))
         {
-            Local<String> stringProperty = arrayValue->ToString();
-            String::AsciiValue value(stringProperty);
-            fprintf(stdout, "%s\n", *value);
-        }
-        else if(arrayValue->IsNumber())
-        {
-            Local<Number> numberProperty = arrayValue->ToNumber();
-            uint32_t value = numberProperty->Value();
-            fprintf(stdout, "%u\n", value);
-        }
-        else if(arrayValue->IsObject())
-        {
-            //Local<Object> objectProperty = arrayValue->ToObject();
-            //Utilities::ParseObject(objectProperty);
+            filePath.insert(0, currentDirectory);
         }
     }
+
+    // get the full path of the file
+    #ifdef _WIN32
+        // http://msdn.microsoft.com/en-us/library/506720ff.aspx
+        fileInfo->fullPath = (const char*)malloc(_MAX_PATH + 1);
+        memset((void*)fileInfo->fullPath, 0, _MAX_PATH + 1);
+        _fullpath((char*)fileInfo->fullPath, filePath.c_str(), _MAX_PATH);
+        
+        // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
+        if((_access_s((char*)fileInfo->fullPath, 0)) != 0)
+        {
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            free((void*)fileInfo->fullPath);
+            fileInfo->fullPath = 0;
+        }
+    #else
+        fileInfo->fullPath = (char*)malloc(PATH_MAX + 1);
+        memset((void*)fileInfo->fullPath, 0, PATH_MAX + 1);
+        if(realpath(filePath.c_str(), (char *)fileInfo->fullPath) == NULL)
+        {
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            free((void*)fileInfo->fullPath);
+            fileInfo->fullPath = 0;
+        }
+    #endif
+
+    // path is valid
+    if(fileInfo->fullPath != 0)
+    {
+        // get the file name only
+        // http://stackoverflow.com/a/5902743
+        const char *charPtr = fileInfo->fullPath + strlen(fileInfo->fullPath);
+        for (; charPtr > fileInfo->fullPath; charPtr--)
+        {
+            if ((*charPtr == '\\') || (*charPtr == '/'))
+            {
+                fileInfo->fileName = ++charPtr;
+                break;
+            }
+        }
+
+        // allocate and store the folder only path
+        unsigned int folderPathLength = strlen(fileInfo->fullPath) - strlen(fileInfo->fileName);
+        fileInfo->folderPath = (const char*)malloc(folderPathLength + 1);
+        memset((void*)fileInfo->folderPath, 0, folderPathLength + 1);
+        memcpy((void*)fileInfo->folderPath, fileInfo->fullPath, folderPathLength);
+
+        // allocate file buffer
+        fileInfo->fileBuffer = Utilities::ReadFile(fileInfo->fullPath, &(fileInfo->fileBufferLength));
+    }
+
+    //fprintf(stdout, "[ Utilities - File ] Full Path: %s\n", fileInfo->fullPath);
+    //fprintf(stdout, "[ Utilities - File ] Folder Path: %s\n", fileInfo->folderPath);
+    //fprintf(stdout, "[ Utilities - File ] File Name: %s\n", fileInfo->fileName);
+
+    return fileInfo;
+}
+
+void Utilities::FreeFileInfo(const FILE_INFO* fileInfo)
+{
+    free((void*)fileInfo->fullPath);
+    free((void*)fileInfo->folderPath);
+    free((void*)fileInfo->fileBuffer);
+
+    free((FILE_INFO*)fileInfo);
 }

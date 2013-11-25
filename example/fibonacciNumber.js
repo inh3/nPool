@@ -3,7 +3,8 @@ var FibModule = function () {
 
 	// private function
     function calcFib(n) {
-        return n > 1 ? calcFib(n - 1) + calcFib(n - 2) : 1;
+        if(n == 0) { return 0; }
+        return n > 2 ? calcFib(n - 1) + calcFib(n - 2) : 1;
     };
 
     // function that matches the unit of work defined work function

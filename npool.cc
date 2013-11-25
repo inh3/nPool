@@ -57,11 +57,11 @@ using namespace std;
 /*---------------------------------------------------------------------------*/
 
 // thread pool
-static THREAD_POOL_DATA     *threadPool;
-static TASK_QUEUE_DATA      *taskQueue;
+static THREAD_POOL_DATA     *threadPool     = 0;
+static TASK_QUEUE_DATA      *taskQueue      = 0;
 
 // file loader and hash
-static FileManager          *fileManager;
+static FileManager          *fileManager    = 0;
 
 /*---------------------------------------------------------------------------*/
 /* STATIC FUNCTION DEFINITIONS */
@@ -73,14 +73,21 @@ static FileManager          *fileManager;
 
 Handle<Value> CreateThreadPool(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - CreateThreadPool\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - CreateThreadPool\n", SyncGetThreadId());
 
     HandleScope scope;
 
     // validate input
     if((args.Length() != 1) || !args[0]->IsNumber())
     {
-        ThrowException(Exception::TypeError(String::New("CreateThreadPool() - Expects 1 arguments: 1) number of threads (uint32)")));
+        ThrowException(Exception::TypeError(String::New("createThreadPool() - Expects 1 arguments: 1) number of threads (uint32)")));
+        return scope.Close(Undefined());
+    }
+
+    // ensure thread pool has not already been created
+    if((taskQueue != 0) || (threadPool != 0))
+    {
+        ThrowException(Exception::TypeError(String::New("createThreadPool() - Thread pool already created")));
         return scope.Close(Undefined());
     }
 
@@ -88,7 +95,7 @@ Handle<Value> CreateThreadPool(const Arguments& args)
     Local<Uint32> v8NumThreads = (args[0])->ToUint32();
     uint32_t numThreads = v8NumThreads->Value();
 
-    fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
+    //fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
 
     // create task queue and thread pool
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
@@ -99,26 +106,38 @@ Handle<Value> CreateThreadPool(const Arguments& args)
 
 Handle<Value> DestoryThreadPool(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
+
+    HandleScope scope;
+
+    // ensure thread pool has already been created
+    if((threadPool == 0) || (taskQueue == 0))
+    {
+        ThrowException(Exception::TypeError(String::New("destroyThreadPool() - No thread pool exists to destroy")));
+        return scope.Close(Undefined());
+    }
 
     // destroy thread pool and task queue
     DestroyThreadPool(threadPool);
     DestroyTaskQueue(taskQueue);
 
-    HandleScope scope;
+    // reset the references because they are no longer valid
+    threadPool = 0;
+    taskQueue = 0;
+
     return scope.Close(Undefined());
 }
 
 Handle<Value> LoadFile(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - LoadFile\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - LoadFile\n", SyncGetThreadId());
 
     HandleScope scope;
 
     // validate input
     if((args.Length() != 2) || !args[0]->IsNumber() || !args[1]->IsString())
     {
-        ThrowException(Exception::TypeError(String::New("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string).")));
+        ThrowException(Exception::TypeError(String::New("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string)")));
         return scope.Close(Undefined());
     }
 
@@ -129,14 +148,20 @@ Handle<Value> LoadFile(const Arguments& args)
     Local<String> v8FilePath = Local<String>::Cast(args[1]);
     String::AsciiValue filePath(v8FilePath);
 
-    fileManager->LoadFile(fileKey, *filePath);
+    // ensure file was loaded successfully
+    LOAD_FILE_STATUS fileStatus = fileManager->LoadFile(fileKey, *filePath);
+    if(fileStatus != LOAD_FILE_SUCCESS)
+    {
+        ThrowException(Exception::TypeError(String::New("loadFile() - Failed to load file. Check if file exists.")));
+        return scope.Close(Undefined());
+    }
 
     return scope.Close(Undefined());
 }
 
 Handle<Value> RemoveFile(const Arguments& args)
 {
-    fprintf(stdout, "[%u] nPool - RemoveFile\n", SyncGetThreadId());
+    //fprintf(stdout, "[%u] nPool - RemoveFile\n", SyncGetThreadId());
 
     HandleScope scope;
 
@@ -173,8 +198,16 @@ Handle<Value> QueueWork(const Arguments& args)
     Handle<Value> v8Object = args[0];
     THREAD_WORK_ITEM* workItem = Thread::BuildWorkItem(v8Object->ToObject());
 
-    // queue the work
-    Thread::QueueWorkItem(taskQueue, workItem);
+    if(workItem == NULL)
+    {
+        ThrowException(Exception::TypeError(String::New("queueWork() - Work item is malformed")));
+        return scope.Close(Undefined());
+    }
+    else
+    {
+        // queue the work
+        Thread::QueueWorkItem(taskQueue, workItem);
+    }
 
     return scope.Close(Undefined());
 }

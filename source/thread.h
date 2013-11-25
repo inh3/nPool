@@ -23,6 +23,20 @@ using namespace v8;
 // thread module map
 typedef unordered_map<uint32_t, Persistent<Object> > ThreadModuleMap;
 
+typedef struct THREAD_CONTEXT_STRUCT
+{
+    // libuv
+    uv_async_t*         uvAsync;
+
+    // v8
+    Isolate*            threadIsolate;
+    Persistent<Context> threadJSContext;
+
+    // thread module cache
+    ThreadModuleMap*    moduleMap;
+
+} THREAD_CONTEXT;
+
 typedef struct THREAD_WORK_ITEM_STRUCT
 {
     // work info and input object/function
@@ -35,6 +49,10 @@ typedef struct THREAD_WORK_ITEM_STRUCT
     Persistent<Object>      callbackContext;
     Persistent<Function>    callbackFunction;
     char*                   callbackObject;
+
+    // indicates error
+    bool                    isError;
+    char*                   jsException;
 
 } THREAD_WORK_ITEM;
 
@@ -52,12 +70,18 @@ class Thread
     private:
 
         // work function and callback
-        static void*    WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadContext, void *threadWorkItem);
-        static void     WorkItemCallback(TASK_QUEUE_WORK_DATA *taskData, void *threadContext, void *threadWorkItem);
+        static void*            WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadContext, void *threadWorkItem);
+        static void             WorkItemCallback(TASK_QUEUE_WORK_DATA *taskData, void *threadContext, void *threadWorkItem);
+
+        // worker object
+        static Handle<Object>   GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_ITEM* workItem);
 
         // uv callbacks
-        static void     uvCloseCallback(uv_handle_t* handle);
-        static void     uvAsyncCallback(uv_async_t* handle, int status);
+        static void             uvCloseCallback(uv_handle_t* handle);
+        static void             uvAsyncCallback(uv_async_t* handle, int status);
+
+        // memory disposal
+        static void             DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem);
 };
 
 #endif /* _THREAD_H_ */

@@ -1,19 +1,16 @@
 #include "nrequire.h"
 
+// C++
+#include <string>
+
 // C
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
+// Custom
+#include "utilities.h"
+#include "isolate_context.h"
 
 Handle<Value> Require::RequireFunction(const Arguments& args)
 {
@@ -22,51 +19,95 @@ Handle<Value> Require::RequireFunction(const Arguments& args)
 	// validate input
     if((args.Length() != 1) || !args[0]->IsString())
     {
-        ThrowException(Exception::TypeError(String::New("nRequire() - Expects 1 arguments: 1) file name (string)")));
-        return scope.Close(Undefined());
+        return scope.Close(ThrowException(Exception::Error(String::New("Require::RequireFunction - Expects 1 arguments: 1) file name (string)"))));
     }
 
 	// get filename string
 	Local<String> v8FileName = (args[0])->ToString();
 	String::AsciiValue fileName(v8FileName);
-	//printf("[%u] Extra File Name: %s\n", SyncGetThreadId(), *fileName);
 
-	// get file size
-	struct stat fileInfo;
-	int objectTypeRef = open(*fileName, O_RDONLY);
-	fstat(objectTypeRef, &fileInfo);
-	close(objectTypeRef);
-	//printf("Extra File Size: %ld\n", fileInfo.st_size);
-
-	// open file for reading
-	FILE *requireFile = fopen(*fileName, "r");
+    // get handle to directory of current executing script
+    Handle<Object> contextObject = Context::GetCalling()->Global();
+    Handle<String> dirNameHandle = contextObject->Get(String::NewSymbol("__dirname"))->ToString();
+    String::Utf8Value __dirname(dirNameHandle);
 
 	// allocate file buffer
-	char *fileBuffer = (char *)malloc(fileInfo.st_size + 1);
-	memset(fileBuffer, 0, fileInfo.st_size + 1);
+    const FILE_INFO* fileInfo = Utilities::GetFileInfo(*fileName, *__dirname);
 
-	// get file contents
-	fread(fileBuffer, 1, fileInfo.st_size, requireFile);
+    // file was invalid
+    if(fileInfo->fileBuffer == 0)
+    {
+        std::string exceptionPrefix("Require::RequireFunction - File Name is invalid: ");
+        std::string exceptionFileName(*fileName);
+        std::string exceptionString = exceptionPrefix + exceptionFileName;
+        return scope.Close(ThrowException(Exception::Error(String::New(exceptionString.c_str()))));
+    }
+    // file was read successfully
+    else
+    {
+        // register external memory
+        V8::AdjustAmountOfExternalAllocatedMemory(fileInfo->fileBufferLength);
 
-	// Create a string containing the JavaScript source code.
-	Handle<String> source = String::New(fileBuffer);
+        // get reference to calling context
+        Handle<Context> globalContext = Context::GetCalling();
 
-	// compile the source code.
-	Handle<Script> script = Script::Compile(source);
+        // create new module context
+        Handle<Context> moduleContext = Context::New();
 
-	// execute the script
-	//printf("[%u] *** START - FILE BEING RUN!: %s\n", SyncGetThreadId(), *fileName);
-	script->Run();
-	//printf("[%u] *** END - FILE WAS RUN!: %s\n", SyncGetThreadId(), *fileName);
+        // set the security token to access calling context properties within new context
+        moduleContext->SetSecurityToken(globalContext->GetSecurityToken());
 
-	// free file buffer and close file ref
-	fclose(requireFile);
-	free(fileBuffer);
+        // enter new context context scope
+        Context::Scope moduleScope(moduleContext);
 
-	// get reference to global context
-  	Handle<Object> globalContext = Context::GetCurrent()->Global();
-  	Handle<Object> module = Handle<Object>::Cast(globalContext->Get(String::New("module")));
+        // clone the calling context properties into this context
+        IsolateContext::CloneGlobalContextObject(globalContext->Global(), moduleContext->Global());
 
-	// return the exports similar to node.js
-	return scope.Close(module->Get(String::New("exports")));
+        // get reference to current context's object
+        Handle<Object> contextObject = moduleContext->Global();
+
+        // create the module context
+        IsolateContext::CreateModuleContext(contextObject, fileInfo);
+
+        // process the source and execute it
+        Handle<Value> scriptResult;
+        {
+            TryCatch scriptTryCatch;
+
+            // compile the script
+            Handle<String> sourceString = String::New(fileInfo->fileBuffer);
+
+            ScriptOrigin scriptOrigin(String::New(fileInfo->fileName));
+            Handle<Script> script = Script::Compile(sourceString, &scriptOrigin);
+            
+            // throw exception if script failed to compile
+            if(script.IsEmpty() || scriptTryCatch.HasCaught())
+            {
+                Utilities::HandleException(&scriptTryCatch);
+                return scriptTryCatch.ReThrow();
+            }
+            
+            //printf("[%u] Require::RequireFunction - Script Running: %s\n", SyncGetThreadId(), *fileName);
+            scriptResult = script->Run();
+            //printf("[%u] Require::RequireFunction - Script Completed: %s\n", SyncGetThreadId(), *fileName);
+
+            // throw exception if script failed to execute
+            if(scriptResult.IsEmpty() || scriptTryCatch.HasCaught())
+            {
+                Utilities::HandleException(&scriptTryCatch);
+                return scriptTryCatch.ReThrow();
+            }
+        }
+
+        // free the file buffer and de-register memory
+        V8::AdjustAmountOfExternalAllocatedMemory(-(fileInfo->fileBufferLength));
+        Utilities::FreeFileInfo(fileInfo);
+
+        // print object properties
+        //Utilities::PrintObjectProperties(contextObject);
+
+        // return module export(s)
+        Handle<Object> moduleObject = contextObject->Get(String::New("module"))->ToObject();
+        return scope.Close(moduleObject->Get(String::New("exports")));
+    }    
 }

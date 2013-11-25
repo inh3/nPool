@@ -11,7 +11,8 @@
             './source/json.cc',
             './source/callback_queue.cc',
             './source/utilities.cc',
-            './source/nrequire.cc'
+            './source/nrequire.cc',
+            './source/isolate_context.cc'
         ],
 
         'include_dirs': [
