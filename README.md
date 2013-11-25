@@ -8,7 +8,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
  * Linux, Mac and Windows support
  * Efficient and straightforward interface
- * Emulated Node.js module loading system within threads
+ * Emulated [Node.js module](http://nodejs.org/api/modules.html#modules_modules) loading system within threads
  * Transparent marshalling of Javascript objects in and out of the thread pool
  * User defined context of the callback function executed after task completion
  * Use of object types to complete units of work
@@ -328,23 +328,39 @@ nPool.queueWork(unitOfWork);
 
 ## Thread Module Support
 
-nPool emulates the Node.js module system for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
+nPool emulates the [Node.js module system](http://nodejs.org/api/modules.html#modules_modules) for loaded files.  The module loading system is emulated because the native functionality is embedded within the Node.js process and is only available within the main Node.js thread.
 
 The emulated module loading system has the following features/limitations:
 
-* Similar 'require(...)' syntax as Node.js
+* Similar `require(...)` syntax as Node.js
  * Currently only individual file-based require() is supported
- * Paths that start with './' and '../' will automatically resolve relative to the file that is performing the require()
+ * Paths that start with `./` and `../` automatically resolve relative to the file performing the `require()`
 * Limited to pure Javascript modules
  * No native or compiled add-ons
 * Supports nested modules
  * Required module requiring other modules
 
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require('./aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/aModule.js'
+var TheModule = require('../aModule.js');
+```
+```js
+// if the current path is '/home/path/'
+// this will require module '/home/path/aModule.js'
+var TheModule = require(__dirname + '/aModule.js');
+```
+
 The reference implementation provided with the source ([`./example`](https://github.com/inh3/nPool/tree/master/example)) demonstrates the emulated module loading mechanism.
 
 ## Future Development
 
-1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding for native add-ons).
+1. Full [Node.js require() algorithm](http://nodejs.org/api/modules.html#modules_all_together) support (excluding native add-ons).
 2. Event based notification and completion mechanism (ie. could be used to indicate progress of task).
 3. Multiple thread pools per Node.js process
 
