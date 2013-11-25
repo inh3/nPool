@@ -89,7 +89,7 @@ var nPool = require('npool');
 var callbackFunction = function (callbackObject, workId, exceptionObject) { ... }
 
 // load files defining object types
-nPool.loadFile(1, './objectType.js');
+nPool.loadFile(1, __dirname + '/objectType.js');
 
 // create thread pool with two threads
 nPool.createThreadPool(2);
@@ -178,7 +178,7 @@ Also, it is important that the full path to the javascript file is provided.  Th
 
 ```js
 // load files defining object types
-nPool.loadFile(1, __dirname + './objectType.js');
+nPool.loadFile(1, __dirname + '/objectType.js');
 ```
 
 Files that are loaded should define an object type (function) that can be instantiated.  Keep in mind this object is used as a service and should be stateless.
