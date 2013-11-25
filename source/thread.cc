@@ -428,7 +428,7 @@ void Thread::DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem)
     }
 
     // wait for gc to do its business (250/1000 "work")
-    while(!V8::IdleNotification(250)) {
+    /*while(!V8::IdleNotification(250)) {
         //fprintf(stdout, "[%u] Thread::uvAsyncCallback - Notifying Idle...\n", SyncGetThreadId());
-    }
+    }*/
 }
