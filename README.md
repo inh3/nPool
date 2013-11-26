@@ -1,8 +1,6 @@
-# nPool
+# nPool [![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool) [![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool)
 
 A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/addons.html).
-
-[![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool)
 
 **nPool's primary features and benefits include:**
 
@@ -40,8 +38,6 @@ One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container
 ## Installation
 
 `npm install npool`
-
-[![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool)
 
 ## Building From Source
 
