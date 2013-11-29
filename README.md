@@ -37,7 +37,7 @@ One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container
 
 ## Installation
 
-`npm install npool`
+[![NPM](https://nodei.co/npm/npool.png?downloads=true)](https://nodei.co/npm/npool/)
 
 ## Building From Source
 
