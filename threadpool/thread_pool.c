@@ -86,7 +86,7 @@ extern int                 GetQueueLength(TASK_QUEUE_DATA *taskQueueData);
 /*---------------------------------------------------------------------------*/
 
 // individual thread function
-static THREAD_FUNC threadFunction(void *threadArg)
+static THREAD_FUNC WINAPI threadFunction(void *threadArg)
 {
     // task item function return data reference
     void* taskData = 0;
