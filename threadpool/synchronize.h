@@ -47,6 +47,8 @@ typedef DWORD               THREAD_FUNC;
 
 #else
 
+#define WINAPI
+
 typedef pthread_cond_t      THREAD_COND;
 typedef pthread_mutex_t     THREAD_MUTEX;
 typedef pthread_t           THREAD;
@@ -69,7 +71,7 @@ extern "C" {
 
 unsigned int        SyncGetThreadId();
 
-int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (*threadFunction)(void *), void *threadContext);
+int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (WINAPI *threadFunction)(void *), void *threadContext);
 
 int                 SyncJoinThread(THREAD threadRef, void** returnValue);
 

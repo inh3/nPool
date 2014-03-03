@@ -51,7 +51,7 @@ unsigned int        SyncGetThreadId()
 }
 
 // CreateThread
-int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (*threadFunction)(void *), void *threadContext)
+int                 SyncCreateThread(THREAD *threadRef, void* threadAttr, THREAD_FUNC (WINAPI *threadFunction)(void *), void *threadContext)
 {
     DWORD threadId = 0;
     
