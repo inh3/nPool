@@ -26,18 +26,18 @@ typedef struct FILE_INFO_STRUCT
 class Utilities
 {
     public:
-        
+
         // create a standard ascii char*
         static char*        CreateCharBuffer(Handle<String> v8String);
-
-        // create a utf8 char*
-        static const char*  ToCString(const String::Utf8Value& value);
 
         // read file contents to char buffer
         static const char*  ReadFile(const char* fileName, int* fileSize);
 
         // exception handler
         static char*        HandleException(TryCatch* tryCatch, bool createExceptionObject = false);
+
+        // copy properties from one object to another
+        static void         CopyObject(Handle<Object> toObject, Handle<Object> fromObject);
 
         // print object properties
         static void         PrintObjectProperties(Handle<Object> objectHandle);

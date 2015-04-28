@@ -8,7 +8,7 @@
             'npool.cc',
             './source/thread.cc',
             './source/file_manager.cc',
-            './source/json.cc',
+            './source/json_utility.cc',
             './source/callback_queue.cc',
             './source/utilities.cc',
             './source/nrequire.cc',
@@ -17,7 +17,8 @@
 
         'include_dirs': [
             './threadpool',
-            './source'
+            './source',
+            "<!(node -e \"require('nan')\")"
         ],
 
         'dependencies': [
@@ -35,7 +36,14 @@
                     '-std=c++11',
                     '-stdlib=libc++'
                 ]
-            }]
+            }],
+             ['OS=="win"', {
+                'include_dirs': [
+                    './threadpool',
+                    './source',
+                    './node_modules/nan'
+                ],
+            }],
         ]
     },
 

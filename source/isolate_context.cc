@@ -5,15 +5,16 @@
 
 // Custom
 #include "nrequire.h"
+#include "json_utility.h"
 
-static Handle<Value> ConsoleLog(const Arguments& args)
+static NAN_METHOD(ConsoleLog)
 {
-    HandleScope scope;
+    NanScope();
 
     // validate input
     if(args.Length() > 1)
     {
-        return scope.Close(ThrowException(Exception::TypeError(String::New("console.log - Expects only 1 argument."))));
+        return NanThrowTypeError("console.log - Expects only 1 argument.");
     }
 
     // get log message
@@ -23,81 +24,75 @@ static Handle<Value> ConsoleLog(const Arguments& args)
     }
     else
     {
-        Handle<Object> contextObject = Context::GetCurrent()->Global();
-        Handle<Object> JSON = contextObject->Get(v8::String::New("JSON"))->ToObject();
-        Handle<Function> JSON_stringify = Handle<Function>::Cast(JSON->Get(v8::String::New("stringify")));
-
-        Handle<Value> argHandle = args[0];
-        String::Utf8Value logMessage(JSON_stringify->Call(JSON, 1, &(argHandle)));
-        printf("%s\n", *logMessage);
+        printf("%s\n", JsonUtility::Stringify(args[0]));
     }
 
-    return scope.Close(Undefined());
+    NanReturnUndefined();
 }
 
 void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
 {
-    HandleScope handleScope;
+    NanScope();
 
     // global namespace object
-    globalContext->Set(String::NewSymbol("global"), Object::New());
+    globalContext->Set(NanNew<String>("global"), NanNew<Object>());
 
     // require(...)
 
     // get handle to nRequire function
-    Local<FunctionTemplate> functionTemplate = FunctionTemplate::New(Require::RequireFunction);
+    Local<FunctionTemplate> functionTemplate = NanNew<FunctionTemplate>(Require::RequireFunction);
     Local<Function> requireFunction = functionTemplate->GetFunction();
-    requireFunction->SetName(String::NewSymbol("require"));
+    requireFunction->SetName(NanNew<String>("require"));
 
     // attach function to context
-    globalContext->Set(String::NewSymbol("require"), requireFunction);
+    globalContext->Set(NanNew<String>("require"), requireFunction);
 
     // console.log(...)
 
     // setup console object
-    Handle<Object> consoleObject = Object::New();
+    Handle<Object> consoleObject = NanNew<Object>();
 
     // get handle to log function
-    Local<FunctionTemplate> logTemplate = FunctionTemplate::New(ConsoleLog);
+    Local<FunctionTemplate> logTemplate = NanNew<FunctionTemplate>(ConsoleLog);
     Local<Function> logFunction = logTemplate->GetFunction();
-    logFunction->SetName(String::NewSymbol("log"));
+    logFunction->SetName(NanNew<String>("log"));
 
     // attach log function to console object
-    consoleObject->Set(String::NewSymbol("log"), logFunction);
+    consoleObject->Set(NanNew<String>("log"), logFunction);
 
     // attach object to context
-    globalContext->Set(String::NewSymbol("console"), consoleObject);
+    globalContext->Set(NanNew<String>("console"), consoleObject);
 
 }
 
 void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, const FILE_INFO* fileInfo)
 {
-    HandleScope handleScope;
+    NanScope();
 
     // set the file properites on the context
-    contextObject->Set(String::NewSymbol("__dirname"), String::New(fileInfo->folderPath));
-    contextObject->Set(String::NewSymbol("__filename"), String::New(fileInfo->fullPath));
+    contextObject->Set(NanNew<String>("__dirname"), NanNew<String>(fileInfo->folderPath));
+    contextObject->Set(NanNew<String>("__filename"), NanNew<String>(fileInfo->fullPath));
 }
 
 void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
 {
-    HandleScope handleScope;
-    
+    NanScope();
+
     // copy global properties
-    cloneObject->Set(String::NewSymbol("global"), sourceObject->Get(String::NewSymbol("global")));
-    cloneObject->Set(String::NewSymbol("require"), sourceObject->Get(String::NewSymbol("require")));
-    cloneObject->Set(String::NewSymbol("console"), sourceObject->Get(String::NewSymbol("console")));
+    cloneObject->Set(NanNew<String>("global"), sourceObject->Get(NanNew<String>("global")));
+    cloneObject->Set(NanNew<String>("require"), sourceObject->Get(NanNew<String>("require")));
+    cloneObject->Set(NanNew<String>("console"), sourceObject->Get(NanNew<String>("console")));
 }
 
 void IsolateContext::CreateModuleContext(Handle<Object> contextObject, const FILE_INFO* fileInfo)
 {
-    HandleScope handleScope;
+    NanScope();
 
     // create the module/exports within context
-    Handle<Object> moduleObject = Object::New();
-    moduleObject->Set(String::NewSymbol("exports"), Object::New());
-    contextObject->Set(String::NewSymbol("module"), moduleObject);
-    contextObject->Set(String::NewSymbol("exports"), moduleObject->Get(String::NewSymbol("exports"))->ToObject());
+    Handle<Object> moduleObject = NanNew<Object>();
+    moduleObject->Set(NanNew<String>("exports"), NanNew<Object>());
+    contextObject->Set(NanNew<String>("module"), moduleObject);
+    contextObject->Set(NanNew<String>("exports"), moduleObject->Get(NanNew<String>("exports"))->ToObject());
 
     // copy file properties
     if(fileInfo != NULL)

@@ -6,6 +6,8 @@
 #include <v8.h>
 using namespace v8;
 
+#include <nan.h>
+
 // threadpool
 #include "synchronize.h"
 
@@ -14,8 +16,8 @@ using namespace v8;
 class Require
 {
     public:
-        
-        static Handle<Value>    RequireFunction(const Arguments& args);
+
+        static NAN_METHOD(RequireFunction);
 };
 
 #endif /* _NREQUIRE_H_ */

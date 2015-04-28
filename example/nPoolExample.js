@@ -8,7 +8,7 @@ catch (e) {
 }
 
 
-// work complete callback from thread pool 
+// work complete callback from thread pool
 var fibonacciCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
@@ -31,7 +31,7 @@ var fibonacciCallbackFunction = function (callbackObject, workId, exceptionObjec
     }
 };
 
-// work complete callback from thread pool 
+// work complete callback from thread pool
 var helloWorldCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
@@ -54,7 +54,7 @@ var helloWorldCallbackFunction = function (callbackObject, workId, exceptionObje
     }
 };
 
-// work complete callback from thread pool 
+// work complete callback from thread pool
 var applesOrangesCallbackFunction = function (callbackObject, workId, exceptionObject) {
 
     console.log("----------------------------------------");
@@ -117,7 +117,7 @@ var startTime = (new Date()).getTime();
 var count = 0;
 (function spinForever () {
     var diffTime = (new Date()).getTime() - startTime;
-    console.log("** Time since last timeout: " + diffTime + " ms");
+    console.log("** Time since last timeout: " + diffTime + " ms + (" + count + ")");
     startTime = (new Date()).getTime();
 
     // continue for ~25 seconds
@@ -126,6 +126,11 @@ var count = 0;
     }
     else {
         nPool.destroyThreadPool();
+        nPool.removeFile(1);
+        nPool.removeFile(2);
+        nPool.removeFile(3);
+        nPool.removeFile(4);
+        nPool.removeFile(5);
     }
 })();
 

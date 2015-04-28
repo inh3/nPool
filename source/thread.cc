@@ -5,13 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-// v8
-#include <v8.h>
-using namespace v8;
+// nan
+#include <nan.h>
 
 // custom source
 #include "file_manager.h"
-#include "json.h"
+#include "json_utility.h"
 #include "utilities.h"
 #include "callback_queue.h"
 #include "isolate_context.h"
@@ -58,23 +57,24 @@ void Thread::ThreadPostInit(void* threadContext)
         isolate->Enter();
 
         // create a stack-allocated handle-scope
-        HandleScope handle_scope;
+        NanScope();
 
-        // create a persistent context for the javascript in this thread
-        Persistent<Context> persistentContext(Context::New());
-
-        // store reference to persistent context
-        thisContext->threadJSContext = persistentContext;
+        // store reference to a new persistent context
+        Local<Context> isolateContext = NanNew<Context>();
+        NanAssignPersistent(thisContext->threadJSContext, isolateContext);
 
         // enter thread specific context
-        Context::Scope context_scope(thisContext->threadJSContext);
+        isolateContext->Enter();
 
         // create global context
-        Handle<Object> globalContext = thisContext->threadJSContext->Global();
+        Local<Object> globalContext = NanGetCurrentContext()->Global();
         IsolateContext::CreateGlobalContext(globalContext);
 
         // create module context
         IsolateContext::CreateModuleContext(globalContext, NULL);
+
+        // exit thread specific context
+        isolateContext->Exit();
     }
 
     // leave the isolate
@@ -95,8 +95,22 @@ void Thread::ThreadDestroy(void* threadContext)
         // enter the isolate
         isolate->Enter();
 
+        // clean-up the worker modules
+        for(ThreadModuleMap::iterator it = thisContext->moduleMap->begin(); it != thisContext->moduleMap->end(); ++it)
+        {
+            PersistentWrap* pWrap = it->second;
+            pWrap->Unref();
+            #if (NODE_MODULE_VERSION > 0x000B)
+            NanDisposePersistent(pWrap->persistent());
+            #else
+            NanDisposePersistent(pWrap->handle_);
+            #endif
+            delete pWrap;
+        }
+        thisContext->moduleMap->clear();
+
         // dispose of js context
-        thisContext->threadJSContext.Dispose();
+        NanDisposePersistent(thisContext->threadJSContext);
     }
 
     // exit the isolate
@@ -124,17 +138,20 @@ THREAD_WORK_ITEM* Thread::BuildWorkItem(Handle<Object> v8Object)
     TryCatch tryCatch;
 
     // get all the properties from the object
-    Local<Number> workId = v8Object->Get(String::NewSymbol("workId"))->ToUint32();
-    Local<Number> fileKey = v8Object->Get(String::NewSymbol("fileKey"))->ToUint32();
-    Local<String> workFunction = v8Object->Get(String::NewSymbol("workFunction"))->ToString();
-    Local<Object> workParam = v8Object->Get(String::NewSymbol("workParam"))->ToObject();
-    Local<Object> callbackContext = v8Object->Get(String::NewSymbol("callbackContext"))->ToObject();
-    Handle<Function> callbackFunction = Handle<Function>::Cast(v8Object->Get(String::NewSymbol("callbackFunction")));
+    Local<Number> workId = v8Object->Get(NanNew<String>("workId"))->ToUint32();
+    Local<Number> fileKey = v8Object->Get(NanNew<String>("fileKey"))->ToUint32();
+    Local<String> workFunction = v8Object->Get(NanNew<String>("workFunction"))->ToString();
+    Local<Object> workParam = v8Object->Get(NanNew<String>("workParam"))->ToObject();
+    Local<Object> callbackContext = v8Object->Get(NanNew<String>("callbackContext"))->ToObject();
+    Handle<Function> callbackFunction = Handle<Function>::Cast(v8Object->Get(NanNew<String>("callbackFunction")));
 
     // determine if the object is valid
-    bool isInvalidWorkObject = (workId.IsEmpty() || fileKey.IsEmpty() ||
-                                workFunction.IsEmpty() || workParam.IsEmpty() ||
-                                callbackContext.IsEmpty() || callbackFunction.IsEmpty());
+    bool isInvalidWorkObject = (workId.IsEmpty() ||
+                                fileKey.IsEmpty() ||
+                                workFunction.IsEmpty() ||
+                                workParam.IsEmpty() ||
+                                callbackContext == NanUndefined() || callbackContext.IsEmpty() ||
+                                callbackFunction.IsEmpty());
 
     // ensure there weren't any exceptions and properties were valid
     if((isInvalidWorkObject == false) || !(tryCatch.HasCaught()))
@@ -153,18 +170,18 @@ THREAD_WORK_ITEM* Thread::BuildWorkItem(Handle<Object> v8Object)
         workItem->workFunction = Utilities::CreateCharBuffer(workFunction);
 
         // generate JSON c str of param object
-        char* stringify = JSON::Stringify(workParam);
+        char* stringify = JsonUtility::Stringify(workParam);
         workItem->workParam = stringify;
 
         // callback context
-        workItem->callbackContext = Persistent<Object>::New(callbackContext);
+        NanAssignPersistent(workItem->callbackContext, callbackContext);
 
         // callback function
-        workItem->callbackFunction = Persistent<Function>::New(callbackFunction);
+        NanAssignPersistent(workItem->callbackFunction, callbackFunction);
 
         // register external memory
         int bytesAlloc = strlen(workItem->workParam) + strlen(workItem->workFunction);
-        V8::AdjustAmountOfExternalAllocatedMemory(bytesAlloc);
+        NanAdjustExternalMemory(bytesAlloc);
     }
 
     return workItem;
@@ -178,7 +195,7 @@ void Thread::QueueWorkItem(TASK_QUEUE_DATA *taskQueue, THREAD_WORK_ITEM *workIte
     // create task queue item object
     taskQueueItem = (TASK_QUEUE_ITEM*)malloc(sizeof(TASK_QUEUE_ITEM));
     memset(taskQueueItem, 0, sizeof(TASK_QUEUE_ITEM));
-    
+
     // set the data size
     taskQueueItem->dataSize = sizeof(THREAD_WORK_ITEM);
 
@@ -193,7 +210,7 @@ void Thread::QueueWorkItem(TASK_QUEUE_DATA *taskQueue, THREAD_WORK_ITEM *workIte
 
     // set the task item id
     taskQueueItem->taskId = workItem->workId;
-    
+
     // add the task to the queue
     AddTaskToQueue(taskQueue, taskQueueItem);
 }
@@ -218,10 +235,11 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         isolate->Enter();
 
         // Create a stack-allocated handle scope.
-        HandleScope handle_scope;
+        NanScope();
 
         // enter thread specific context
-        Context::Scope context_scope(thisContext->threadJSContext);
+        Local<Context> isolateContext = NanNew<Context>(thisContext->threadJSContext);
+        isolateContext->Enter();
 
         // exception catcher
         TryCatch tryCatch;
@@ -233,14 +251,14 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
         if(workItem->isError == false)
         {
             // get work param
-            Handle<Value> workParam = JSON::Parse(workItem->workParam);
+            Handle<Value> workParam = JsonUtility::Parse(workItem->workParam);
 
             // get worker function name
-            Handle<Value> workerFunction = workerObject->Get(String::New(workItem->workFunction));
+            Handle<Value> workerFunction = workerObject->Get(NanNew<String>(workItem->workFunction));
 
             // execute function and get work result
-            Handle<Value> workResult = Handle<Function>::Cast(workerFunction)->Call(workerObject, 1, &workParam);
-            
+            Handle<Value> workResult = workerFunction.As<Function>()->Call(workerObject, 1, &workParam);
+
             // work failed to perform successfully
             if(workResult.IsEmpty() || tryCatch.HasCaught())
             {
@@ -251,14 +269,17 @@ void* Thread::WorkItemFunction(TASK_QUEUE_WORK_DATA *taskData, void *threadConte
             else
             {
                 // strinigfy callback object
-                char* stringify = JSON::Stringify(workResult->ToObject());
+                char* stringify = JsonUtility::Stringify(workResult->ToObject());
                 workItem->callbackObject = stringify;
                 workItem->isError = false;
 
                 // register external memory
-                V8::AdjustAmountOfExternalAllocatedMemory(strlen(workItem->callbackObject));
+                NanAdjustExternalMemory(strlen(workItem->callbackObject));
             }
         }
+
+        // exit thread specific context
+        isolateContext->Exit();
     }
 
     // leave the isolate
@@ -292,36 +313,41 @@ void Thread::uvCloseCallback(uv_handle_t* handle)
     free(handle);
 }
 
+#if NODE_VERSION_AT_LEAST(0, 11, 13)
+void Thread::uvAsyncCallback(uv_async_t* handle)
+#else
 void Thread::uvAsyncCallback(uv_async_t* handle, int status)
+#endif
 {
     //fprintf(stdout, "[%u] Thread::uvAsyncCallback - Async: %p\n", SyncGetThreadId(), handle);
 
-    HandleScope scope;
+    NanScope();
 
     // process all work items awaiting callback
     THREAD_WORK_ITEM* workItem = 0;
     while((workItem = callbackQueue->GetWorkItem()) != 0)
     {
-        Handle<Value> callbackObject = Null();
-        Handle<Value> exceptionObject = Null();
+        Handle<Value> callbackObject = NanNull();
+        Handle<Value> exceptionObject = NanNull();
 
         // parse exception if one is present
         if(workItem->isError == true)
         {
-            exceptionObject = JSON::Parse(workItem->jsException);
+            exceptionObject = JsonUtility::Parse(workItem->jsException);
         }
         else
         {
             // parse stringified result
-            callbackObject = JSON::Parse(workItem->callbackObject);
+            callbackObject = JsonUtility::Parse(workItem->callbackObject);
         }
 
         //create arguments array
         const unsigned argc = 3;
-        Handle<Value> argv[argc] = { callbackObject, Number::New(workItem->workId), exceptionObject };
+        Handle<Value> argv[argc] = { NanNew<Value>(callbackObject), NanNew<Number>(workItem->workId), exceptionObject };
 
         // make callback on node thread
-        workItem->callbackFunction->Call(workItem->callbackContext, argc, argv);
+        Local<Function> callbackFunction = NanNew<Function>(workItem->callbackFunction);
+        callbackFunction->Call(NanNew<Object>(workItem->callbackContext), argc, argv);
 
         // clean up memory and dispose of persistent references
         Thread::DisposeWorkItem(workItem, true);
@@ -330,7 +356,7 @@ void Thread::uvAsyncCallback(uv_async_t* handle, int status)
 
 Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_ITEM* workItem)
 {
-    HandleScope scope;
+    NanEscapableScope();
 
     // return variable and exception
     Handle<Object> workerObject;
@@ -348,12 +374,12 @@ Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_
     if(workFileInfo != 0)
     {
         // update the context for file properties of work file
-        Handle<Object> globalContext = thisContext->threadJSContext->Global();
+        Handle<Object> globalContext = NanNew<Context>(thisContext->threadJSContext)->Global();
         IsolateContext::UpdateContextFileProperties(globalContext, workFileInfo);
 
         // compile the source code
-        ScriptOrigin scriptOrigin(String::New(workFileInfo->fileName));
-        Handle<Script> script = Script::Compile(String::New(workFileInfo->fileBuffer), &scriptOrigin);
+        ScriptOrigin scriptOrigin(NanNew<String>(workFileInfo->fileName));
+        Handle<Script> script = Script::Compile(NanNew<String>(workFileInfo->fileBuffer), &scriptOrigin);
 
         // check for exception on compile
         if(script.IsEmpty() || tryCatch.HasCaught())
@@ -375,12 +401,24 @@ Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_
             }
             else
             {
-                // get the handle to constructor function of worker object type
-                Handle<Function> constructorFunction = Handle<Function>::Cast(scriptResult);
-                workerObject = constructorFunction->NewInstance();
+                 // create object template in order to use object wrap
+                Handle<ObjectTemplate> objectTemplate = NanNew<ObjectTemplate>();
+                objectTemplate->SetInternalFieldCount(1);
+                workerObject = objectTemplate->NewInstance();
+
+                // copy the script result to the worker object
+                Utilities::CopyObject(
+                    workerObject,
+                    scriptResult.As<Function>()->NewInstance());
 
                 // cache the persistent object type for later use
-                thisContext->moduleMap->insert(make_pair(workItem->fileKey, Persistent<Object>::New(workerObject)));
+                // wrap the object so it can be persisted
+                PersistentWrap* objectWrap = new PersistentWrap();
+                objectWrap->Wrap(workerObject);
+                objectWrap->Ref();
+                thisContext->moduleMap->insert(make_pair(
+                    workItem->fileKey,
+                    objectWrap));
             }
         }
     }
@@ -388,20 +426,18 @@ Handle<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_
     else
     {
         // get the constructor function from cache
-        workerObject = thisContext->moduleMap->find(workItem->fileKey)->second;
+        workerObject = NanNew(NanObjectWrapHandle(thisContext->moduleMap->find(workItem->fileKey)->second));
     }
 
-    return scope.Close(workerObject);
+    return  NanEscapeScope(workerObject);
 }
 
 void Thread::DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem)
 {
     // cleanup the work item data
-    workItem->callbackContext.Dispose();
-    workItem->callbackContext.Clear();
+    NanDisposePersistent(workItem->callbackContext);
 
-    workItem->callbackFunction.Dispose();
-    workItem->callbackFunction.Clear();
+    NanDisposePersistent(workItem->callbackFunction);
 
     // de-register memory
     int bytesToFree = strlen(workItem->workParam) + strlen(workItem->workFunction);
@@ -409,7 +445,7 @@ void Thread::DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem)
     {
         bytesToFree += strlen(workItem->callbackObject);
     }
-    V8::AdjustAmountOfExternalAllocatedMemory(-bytesToFree);
+    NanAdjustExternalMemory(-bytesToFree);
 
     // un-alloc the memory
     free(workItem->workFunction);
@@ -426,9 +462,4 @@ void Thread::DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem)
     {
         free(workItem);
     }
-
-    // wait for gc to do its business (250/1000 "work")
-    /*while(!V8::IdleNotification(250)) {
-        //fprintf(stdout, "[%u] Thread::uvAsyncCallback - Notifying Idle...\n", SyncGetThreadId());
-    }*/
 }

@@ -11,6 +11,7 @@ using namespace std;
 #endif
 
 // node
+#include <uv.h>
 #include <node.h>
 #include <v8.h>
 using namespace v8;
@@ -20,8 +21,10 @@ using namespace v8;
 #include "task_queue.h"
 #include "thread_pool.h"
 
+#include "persistent_wrap.h"
+
 // thread module map
-typedef unordered_map<uint32_t, Persistent<Object> > ThreadModuleMap;
+typedef unordered_map<uint32_t, PersistentWrap*> ThreadModuleMap;
 
 typedef struct THREAD_CONTEXT_STRUCT
 {
@@ -59,7 +62,7 @@ typedef struct THREAD_WORK_ITEM_STRUCT
 class Thread
 {
     public:
-        
+
         static void*                ThreadInit();
         static void                 ThreadPostInit(void* threadContext);
         static void                 ThreadDestroy(void* threadContext);
@@ -78,7 +81,12 @@ class Thread
 
         // uv callbacks
         static void             uvCloseCallback(uv_handle_t* handle);
+
+        #if NODE_VERSION_AT_LEAST(0, 11, 13)
+        static void             uvAsyncCallback(uv_async_t* handle);
+        #else
         static void             uvAsyncCallback(uv_async_t* handle, int status);
+        #endif
 
         // memory disposal
         static void             DisposeWorkItem(THREAD_WORK_ITEM* workItem, bool freeWorkItem);

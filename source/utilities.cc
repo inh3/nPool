@@ -16,24 +16,19 @@
 #include <io.h>
 #endif
 
+#include <nan.h>
+
 // custom
 #include "synchronize.h"
-#include "json.h"
+#include "json_utility.h"
 
 char* Utilities::CreateCharBuffer(Handle<String> v8String)
 {
-    char* charBuffer = (char*)malloc(v8String->Length() + 1);
-    memset(charBuffer, 0, v8String->Length() + 1);
-    String::AsciiValue bufferValue(v8String);
-    memcpy(charBuffer, *bufferValue, v8String->Length());
-
+    NanUtf8String bufferValue(v8String);
+    char* charBuffer = (char*)malloc(bufferValue.length() + 1);
+    memset(charBuffer, 0, bufferValue.length() + 1);
+    memcpy(charBuffer, *bufferValue, bufferValue.length());
     return charBuffer;
-}
-
-// taken from examples given at: http://izs.me/v8-docs/classv8_1_1String_1_1Utf8Value.html
-const char* Utilities::ToCString(const String::Utf8Value& value)
-{
-    return *value ? *value : "<string conversion failed>";
 }
 
 const char* Utilities::ReadFile(const char* fileName, int* fileSize)
@@ -80,7 +75,7 @@ char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
     char* exceptionBuffer = NULL;
 
     // create scope for exception
-    HandleScope handleScope;
+    NanScope();
 
     // get the exception message
     Handle<Message> exceptionMessage = tryCatch->Message();
@@ -91,38 +86,51 @@ char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
         // build exception object if required
         if(createExceptionObject == true)
         {
-            Handle<Object> exceptionObject = Object::New();
-            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Exception());
-            exceptionBuffer = JSON::Stringify(exceptionObject);
+            Local<Object> exceptionObject = NanNew<Object>();
+            exceptionObject->Set(NanNew<String>("message"), tryCatch->Exception());
+            exceptionBuffer = JsonUtility::Stringify(exceptionObject);
         }
-    } 
+    }
     // there was a valid message attached to the exception
     else
     {
         // build exception object if required
         if(createExceptionObject == true)
         {
-            Handle<Object> exceptionObject = Object::New();
+            Local<Object> exceptionObject = NanNew<Object>();
 
-            exceptionObject->Set(String::NewSymbol("message"), tryCatch->Message()->Get());
-            exceptionObject->Set(String::NewSymbol("resourceName"), exceptionMessage->GetScriptResourceName());
-            exceptionObject->Set(String::NewSymbol("lineNum"), Number::New(exceptionMessage->GetLineNumber()));
-            exceptionObject->Set(String::NewSymbol("sourceLine"), exceptionMessage->GetSourceLine());
-            exceptionObject->Set(String::NewSymbol("scriptData"), exceptionMessage->GetScriptData());
+            exceptionObject->Set(NanNew<String>("message"), tryCatch->Message()->Get());
+            exceptionObject->Set(NanNew<String>("resourceName"), exceptionMessage->GetScriptResourceName());
+            exceptionObject->Set(NanNew<String>("lineNum"), NanNew<Number>(exceptionMessage->GetLineNumber()));
+            exceptionObject->Set(NanNew<String>("sourceLine"), exceptionMessage->GetSourceLine());
+            // missing reference with 0.11.13
+            #if !(NODE_VERSION_AT_LEAST(0, 11, 13))
+            exceptionObject->Set(NanNew<String>("scriptData"), exceptionMessage->GetScriptData());
+            #endif
             if(!tryCatch->StackTrace().IsEmpty())
             {
-                exceptionObject->Set(String::NewSymbol("stackTrace"), tryCatch->StackTrace());
+                exceptionObject->Set(NanNew<String>("stackTrace"), tryCatch->StackTrace());
             }
             else
             {
-                exceptionObject->Set(String::NewSymbol("stackTrace"), Null());
+                exceptionObject->Set(NanNew<String>("stackTrace"), NanNull());
             }
 
-            exceptionBuffer = JSON::Stringify(exceptionObject);
+            exceptionBuffer = JsonUtility::Stringify(exceptionObject);
         }
     }
 
     return exceptionBuffer;
+}
+
+void Utilities::CopyObject(Handle<Object> toObject, Handle<Object> fromObject)
+{
+    Local<Array> propertyKeys = fromObject->GetPropertyNames();
+    for (uint32_t keyIndex = 0; keyIndex < propertyKeys->Length(); keyIndex++)
+    {
+        Handle<Value> propertyKey = propertyKeys->Get(keyIndex);
+        toObject->Set(propertyKey, fromObject->Get(propertyKey));
+    }
 }
 
 void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
@@ -131,7 +139,7 @@ void Utilities::PrintObjectProperties(Handle<Object> objectHandle)
     for (uint32_t keyIndex = 0; keyIndex < propertyKeys->Length(); keyIndex++)
     {
         Handle<v8::String> keyString = propertyKeys->Get(keyIndex)->ToString();
-        String::AsciiValue propertyName(keyString);
+        NanUtf8String propertyName(keyString);
         fprintf(stdout, "[ Property %u ] %s\n", keyIndex, *propertyName);
     }
 }
@@ -142,8 +150,13 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
     FILE_INFO* fileInfo = (FILE_INFO*)malloc(sizeof(FILE_INFO));
     memset(fileInfo, 0, sizeof(FILE_INFO));
 
+    /*fprintf(stdout, "[ Utilities - GetFileInfo ] Relative Path: %s Current Dir: %s\n",
+        relativePath,
+        currentDirectory);*/
+
     // check if relative path should be combined with current directory
     std::string filePath(relativePath);
+    //fprintf(stdout, "[ Utilities - GetFileInfo ] File Path: %s\n", filePath.c_str());
     if((currentDirectory != NULL) && (strlen(relativePath) > 2))
     {
         // combine current directory to relative path if it starts with './' or '../'
@@ -160,11 +173,11 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
         fileInfo->fullPath = (const char*)malloc(_MAX_PATH + 1);
         memset((void*)fileInfo->fullPath, 0, _MAX_PATH + 1);
         _fullpath((char*)fileInfo->fullPath, filePath.c_str(), _MAX_PATH);
-        
+
         // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
         if((_access_s((char*)fileInfo->fullPath, 0)) != 0)
         {
-            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }
@@ -173,7 +186,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
         memset((void*)fileInfo->fullPath, 0, PATH_MAX + 1);
         if(realpath(filePath.c_str(), (char *)fileInfo->fullPath) == NULL)
         {
-            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }

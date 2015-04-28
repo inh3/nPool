@@ -9,7 +9,7 @@ var FibModule = function () {
 
     // function that matches the unit of work defined work function
     this.calcFibonacciNumber = function (workParam) {
-        return { 
+        return {
             fibCalcResult: calcFib(workParam.fibNumber)
         };
     };

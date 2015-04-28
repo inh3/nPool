@@ -15,7 +15,7 @@ var ApplesOranges = function() {
         });
 
         // return callback object
-        return { 
+        return {
             // return passed in parameter
             origFruitArray: workParam.fruitArray,
 
