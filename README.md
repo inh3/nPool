@@ -15,6 +15,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
  * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
+ * Support for Node.js 0.10/0.12 and latest stable IO.js
 
 ## Table of Contents
 
@@ -49,7 +50,7 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.10.*
+* Node.js 0.10/0.12, IO.js
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11
@@ -57,10 +58,9 @@ This will automatically configure the environment and produce the add-on module.
 * Core GNU build toolchain
 
 *Currently during development the following compilers are tested:*
- * gcc 4.6
- * gcc 4.7.2
- * clang 4.2
- * Visual Studio Express 2012 for Windows Desktop (msbuild.exe)
+ * gcc/g++ 4.9.1 (Ubuntu)
+ * clang 5.0 (Mac OS X Mavericks)
+ * Visual Studio Express 2013 (Windows 8.1)
 
 ## Example
 
