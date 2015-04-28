@@ -15,7 +15,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
  * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
- * Support for Node.js 0.10/0.12 and latest stable IO.js
+ * Support for [Node.js](https://nodejs.org) 0.8/0.10/0.12 and [io.js](https://iojs.org)
 
 ## Table of Contents
 
@@ -32,7 +32,7 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
 
 nPool is written entirely in C/C++.  The thread pool and synchronization frameworks are written in C and the add-on interface is written in C++.  The library has no third-party dependencies other than [Node.js](http://nodejs.org/) and [V8](https://code.google.com/p/v8/).
 
-The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Unix.  On Windows, native threads ([`_beginthreadex`](http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Task based units of work are performed via a FIFO queue that is processed by the thread pool.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via [libuv’s](http://nikhilm.github.io/uvbook/introduction.html) [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
+The cross-platform threading component utilizes [`pthreads`](https://computing.llnl.gov/tutorials/pthreads/) for Mac and Linux.  On Windows, native threads ([`_beginthreadex`](http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx)) and [`CRITICAL_SECTIONS`](http://msdn.microsoft.com/en-us/library/windows/desktop/ms682530) are used.  Task based units of work are performed via a FIFO queue that is processed by the thread pool.  Each thread within the thread pool utilizes a distinct [`v8::Isolate`](http://izs.me/v8-docs/classv8_1_1Isolate.html) to execute javascript parallely.  Callbacks to the main Node.js thread are coordinated via [libuv’s](http://nikhilm.github.io/uvbook/introduction.html) [`uv_async`](http://nikhilm.github.io/uvbook/threads.html#inter-thread-communication) inter-thread communication mechanism.
 
 One thing to note, [`unordered_maps`](http://en.cppreference.com/w/cpp/container/unordered_map) are used within the add-on interface, therefore, it is necessary that the platform of choice provides [C++11](http://en.wikipedia.org/wiki/C%2B%2B11) (Windows and Linux) or [TR1](http://en.wikipedia.org/wiki/C%2B%2B_Technical_Report_1) (Apple) implementations of the standard library.
 
@@ -50,7 +50,8 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.10/0.12, IO.js
+* Node.js 0.8/0.10/0.12, io.js
+ * Node.js 0.8 is only supported for Mac and Linux
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11
@@ -81,7 +82,7 @@ nPool provides a very simple and efficient interface.  Currently, there are a to
 // load nPool module
 var nPool = require('npool');
 
-// work complete callback from thread pool 
+// work complete callback from thread pool
 var callbackFunction = function (callbackObject, workId, exceptionObject) { ... }
 
 // load files defining object types
@@ -114,7 +115,7 @@ nPool.queueWork(unitOfWork);
 ```js
 createThreadPool(numThreads)
 ```
- 
+
 This function creates the thread pool.  At this time, the module only supports one thread pool per Node.js process.  Therefore, this function should only be called once, prior to `queueWork` or `destroyThreadPool`.
 
 The function takes one parameter:
@@ -201,7 +202,7 @@ var ApplesOranges = function() {
         });
 
         // return callback object
-        return { 
+        return {
             // return passed in parameter
             origFruitArray: workParam.fruitArray,
 
@@ -374,8 +375,8 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of nPool nor the names of its contributors may be used 
-      to endorse or promote products derived from this software without specific 
+    * Neither the name of nPool nor the names of its contributors may be used
+      to endorse or promote products derived from this software without specific
       prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
