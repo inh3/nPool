@@ -92,10 +92,8 @@ NAN_METHOD(Require::RequireFunction)
             if(moduleScript.IsEmpty() || scriptTryCatch.HasCaught())
             {
                 Require::FreeFileInfo((FILE_INFO*)fileInfo);
-                NanUtf8String* exceptionSerialized = Utilities::HandleException(&scriptTryCatch);
-                std::string exceptionString(**exceptionSerialized);
-                delete exceptionSerialized;
-                return NanThrowError(exceptionString.c_str());
+                scriptTryCatch.ReThrow();
+                NanReturnUndefined();
             }
 
             //printf("[%u] Require::RequireFunction - Script Running: %s\n", SyncGetThreadId(), *fileName);
@@ -106,10 +104,8 @@ NAN_METHOD(Require::RequireFunction)
             if(scriptResult.IsEmpty() || scriptTryCatch.HasCaught())
             {
                 Require::FreeFileInfo((FILE_INFO*)fileInfo);
-                NanUtf8String* exceptionSerialized = Utilities::HandleException(&scriptTryCatch);
-                std::string exceptionString(**exceptionSerialized);
-                delete exceptionSerialized;
-                return NanThrowError(exceptionString.c_str());
+                scriptTryCatch.ReThrow();
+                NanReturnUndefined();
             }
         }
 

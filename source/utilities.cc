@@ -175,7 +175,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
         // http://msdn.microsoft.com/en-us/library/a2xs1dts.aspx
         if((_access_s((char*)fileInfo->fullPath, 0)) != 0)
         {
-            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }
@@ -184,7 +184,7 @@ FILE_INFO* Utilities::GetFileInfo(const char* relativePath, const char* currentD
         memset((void*)fileInfo->fullPath, 0, PATH_MAX + 1);
         if(realpath(filePath.c_str(), (char *)fileInfo->fullPath) == NULL)
         {
-            fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
+            //fprintf(stdout, "[ Utilities - Error ] Invalid File: %s\n", filePath.c_str());
             free((void*)fileInfo->fullPath);
             fileInfo->fullPath = 0;
         }
