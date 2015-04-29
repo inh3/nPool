@@ -24,7 +24,9 @@ static NAN_METHOD(ConsoleLog)
     }
     else
     {
-        printf("%s\n", JsonUtility::Stringify(args[0]));
+        NanUtf8String* utf8String = JsonUtility::Stringify(args[0]);
+        printf("%s\n", **utf8String);
+        delete utf8String;
     }
 
     NanReturnUndefined();

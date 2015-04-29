@@ -1,7 +1,5 @@
 #include "json_utility.h"
 
-#include <nan.h>
-
 // C
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +8,7 @@
 // custom source
 #include "utilities.h"
 
-char* JsonUtility::Stringify(Handle<Value> valueHandle)
+NanUtf8String* JsonUtility::Stringify(Handle<Value> valueHandle)
 {
     NanScope();
 
@@ -21,20 +19,7 @@ char* JsonUtility::Stringify(Handle<Value> valueHandle)
 
     // execute stringify
     Handle<Value> stringifyResult = stringifyFunc->Call(jsonObject, 1, &valueHandle);
-
-    // only process if the result is valid
-    if(stringifyResult->IsUndefined() == false)
-    {
-        NanUtf8String utf8String(stringifyResult);
-        char* returnString = (char *)malloc(utf8String.length() + 1);
-        memset(returnString, 0, utf8String.length() + 1);
-        memcpy(returnString, *utf8String, utf8String.length() + 1);
-        return returnString;
-    }
-
-    char* returnString = (char *)malloc(1);
-    memset(returnString, 0, 1);
-    return returnString;
+    return new NanUtf8String(stringifyResult);
 }
 
 Handle<Value> JsonUtility::Parse(char* objectString)

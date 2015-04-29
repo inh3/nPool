@@ -16,8 +16,6 @@
 #include <io.h>
 #endif
 
-#include <nan.h>
-
 // custom
 #include "synchronize.h"
 #include "json_utility.h"
@@ -69,10 +67,10 @@ const char* Utilities::ReadFile(const char* fileName, int* fileSize)
 }
 
 // https://code.google.com/p/v8/source/browse/trunk/samples/shell.cc
-char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
+NanUtf8String* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
 {
     // return value
-    char* exceptionBuffer = NULL;
+    NanUtf8String* exceptionSerialized = NULL;
 
     // create scope for exception
     NanScope();
@@ -88,7 +86,7 @@ char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
         {
             Local<Object> exceptionObject = NanNew<Object>();
             exceptionObject->Set(NanNew<String>("message"), tryCatch->Exception());
-            exceptionBuffer = JsonUtility::Stringify(exceptionObject);
+            exceptionSerialized = JsonUtility::Stringify(exceptionObject);
         }
     }
     // there was a valid message attached to the exception
@@ -116,11 +114,11 @@ char* Utilities::HandleException(TryCatch* tryCatch, bool createExceptionObject)
                 exceptionObject->Set(NanNew<String>("stackTrace"), NanNull());
             }
 
-            exceptionBuffer = JsonUtility::Stringify(exceptionObject);
+            exceptionSerialized = JsonUtility::Stringify(exceptionObject);
         }
     }
 
-    return exceptionBuffer;
+    return exceptionSerialized;
 }
 
 void Utilities::CopyObject(Handle<Object> toObject, Handle<Object> fromObject)

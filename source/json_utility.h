@@ -6,11 +6,13 @@
 #include <v8.h>
 using namespace v8;
 
+#include <nan.h>
+
 class JsonUtility
 {
     public:
 
-        static char*            Stringify(Handle<Value> valueHandle);
+        static NanUtf8String*   Stringify(Handle<Value> valueHandle);
         static Handle<Value>    Parse(char* objectString);
 };
 

@@ -9,7 +9,6 @@
 #include <string.h>
 
 // Custom
-#include "utilities.h"
 #include "isolate_context.h"
 
 NAN_METHOD(Require::RequireFunction)
@@ -92,7 +91,11 @@ NAN_METHOD(Require::RequireFunction)
             // throw exception if script failed to compile
             if(moduleScript.IsEmpty() || scriptTryCatch.HasCaught())
             {
-                return NanThrowError(Utilities::HandleException(&scriptTryCatch));
+                Require::FreeFileInfo((FILE_INFO*)fileInfo);
+                NanUtf8String* exceptionSerialized = Utilities::HandleException(&scriptTryCatch);
+                std::string exceptionString(**exceptionSerialized);
+                delete exceptionSerialized;
+                return NanThrowError(exceptionString.c_str());
             }
 
             //printf("[%u] Require::RequireFunction - Script Running: %s\n", SyncGetThreadId(), *fileName);
@@ -102,19 +105,26 @@ NAN_METHOD(Require::RequireFunction)
             // throw exception if script failed to execute
             if(scriptResult.IsEmpty() || scriptTryCatch.HasCaught())
             {
-                return NanThrowError(Utilities::HandleException(&scriptTryCatch));
+                Require::FreeFileInfo((FILE_INFO*)fileInfo);
+                NanUtf8String* exceptionSerialized = Utilities::HandleException(&scriptTryCatch);
+                std::string exceptionString(**exceptionSerialized);
+                delete exceptionSerialized;
+                return NanThrowError(exceptionString.c_str());
             }
         }
 
-        // free the file buffer and de-register memory
-        NanAdjustExternalMemory(-(fileInfo->fileBufferLength));
-        Utilities::FreeFileInfo(fileInfo);
-
         // print object properties
         //Utilities::PrintObjectProperties(contextObject);
+        Require::FreeFileInfo((FILE_INFO*)fileInfo);
 
         // return module export(s)
         Handle<Object> moduleObject = contextObject->Get(NanNew<String>("module"))->ToObject();
         NanReturnValue(moduleObject->Get(NanNew<String>("exports")));
     }
+}
+
+void Require::FreeFileInfo(FILE_INFO* fileInfo) {
+    // free the file buffer and de-register memory
+    NanAdjustExternalMemory(-(fileInfo->fileBufferLength));
+    Utilities::FreeFileInfo(fileInfo);
 }

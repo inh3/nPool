@@ -9,6 +9,8 @@
 #include <v8.h>
 using namespace v8;
 
+#include <nan.h>
+
 typedef struct FILE_INFO_STRUCT
 {
     const char*             fileName;
@@ -28,25 +30,25 @@ class Utilities
     public:
 
         // create a standard ascii char*
-        static char*        CreateCharBuffer(Handle<String> v8String);
+        static char*            CreateCharBuffer(Handle<String> v8String);
 
         // read file contents to char buffer
-        static const char*  ReadFile(const char* fileName, int* fileSize);
+        static const char*      ReadFile(const char* fileName, int* fileSize);
 
         // exception handler
-        static char*        HandleException(TryCatch* tryCatch, bool createExceptionObject = false);
+        static NanUtf8String*   HandleException(TryCatch* tryCatch, bool createExceptionObject = false);
 
         // copy properties from one object to another
-        static void         CopyObject(Handle<Object> toObject, Handle<Object> fromObject);
+        static void             CopyObject(Handle<Object> toObject, Handle<Object> fromObject);
 
         // print object properties
-        static void         PrintObjectProperties(Handle<Object> objectHandle);
+        static void             PrintObjectProperties(Handle<Object> objectHandle);
 
         // get file name and directory from path
-        static FILE_INFO*   GetFileInfo(const char* relativePath, const char* currentDirectory = NULL);
+        static FILE_INFO*       GetFileInfo(const char* relativePath, const char* currentDirectory = NULL);
 
         // free file info that was created from GetFileInfo
-        static void         FreeFileInfo(const FILE_INFO* fileInfo);
+        static void             FreeFileInfo(const FILE_INFO* fileInfo);
 };
 
 #endif /* _UTILITIES_H_ */

@@ -11,6 +11,9 @@ using namespace v8;
 // threadpool
 #include "synchronize.h"
 
+// custom
+#include "utilities.h"
+
 #define REQUIRE_FUNCTION_NAME "require"
 
 class Require
@@ -18,6 +21,10 @@ class Require
     public:
 
         static NAN_METHOD(RequireFunction);
+
+    private:
+
+        static void     FreeFileInfo(FILE_INFO* fileInfo);
 };
 
 #endif /* _NREQUIRE_H_ */

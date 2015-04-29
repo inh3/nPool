@@ -16,6 +16,8 @@ using namespace std;
 #include <v8.h>
 using namespace v8;
 
+#include <nan.h>
+
 // threadpool
 #include "synchronize.h"
 #include "task_queue.h"
@@ -46,16 +48,16 @@ typedef struct THREAD_WORK_ITEM_STRUCT
     uint32_t                workId;
     uint32_t                fileKey;
     char*                   workFunction;
-    char*                   workParam;
+    NanUtf8String*          workParam;
 
     // callback and output object/function
     Persistent<Object>      callbackContext;
     Persistent<Function>    callbackFunction;
-    char*                   callbackObject;
+    NanUtf8String*          callbackObject;
 
     // indicates error
     bool                    isError;
-    char*                   jsException;
+    NanUtf8String*          jsException;
 
 } THREAD_WORK_ITEM;
 
