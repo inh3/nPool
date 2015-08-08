@@ -12,8 +12,8 @@ class JsonUtility
 {
     public:
 
-        static NanUtf8String*   Stringify(Handle<Value> valueHandle);
-        static Handle<Value>    Parse(char* objectString);
+        static Nan::Utf8String*   Stringify(Local<Value> valueHandle);
+        static Local<Value>    Parse(char* objectString);
 };
 
 #endif /* _JSON_UTILITY_H_ */

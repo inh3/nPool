@@ -76,22 +76,22 @@ NAN_METHOD(CreateThreadPool)
 {
     //fprintf(stdout, "[%u] nPool - CreateThreadPool\n", SyncGetThreadId());
 
-    NanScope();
+    Nan::HandleScope();
 
     // validate input
-    if((args.Length() != 1) || !args[0]->IsNumber())
+    if((info.Length() != 1) || !info[0]->IsNumber())
     {
-        return NanThrowError("createThreadPool() - Expects 1 arguments: 1) number of threads (uint32)");
+        return Nan::ThrowError("createThreadPool() - Expects 1 arguments: 1) number of threads (uint32)");
     }
 
     // ensure thread pool has not already been created
     if((taskQueue != 0) || (threadPool != 0))
     {
-        return NanThrowError("createThreadPool() - Thread pool already created");
+        return Nan::ThrowError("createThreadPool() - Thread pool already created");
     }
 
     // number of threads
-    Local<Uint32> v8NumThreads = (args[0])->ToUint32();
+    Local<Uint32> v8NumThreads = (info[0])->ToUint32();
     uint32_t numThreads = v8NumThreads->Value();
 
     //fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
@@ -100,19 +100,19 @@ NAN_METHOD(CreateThreadPool)
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
     threadPool = CreateThreadPool(numThreads, taskQueue, Thread::ThreadInit, Thread::ThreadPostInit, Thread::ThreadDestroy);
 
-    NanReturnUndefined();
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(DestoryThreadPool)
 {
     //fprintf(stdout, "[%u] nPool - DestoryThreadPool\n", SyncGetThreadId());
 
-    NanScope();
+    Nan::HandleScope();
 
     // ensure thread pool has already been created
     if((threadPool == 0) || (taskQueue == 0))
     {
-        return NanThrowError("destroyThreadPool() - No thread pool exists to destroy");
+        return Nan::ThrowError("destroyThreadPool() - No thread pool exists to destroy");
     }
 
     // destroy thread pool and task queue
@@ -123,76 +123,76 @@ NAN_METHOD(DestoryThreadPool)
     threadPool = 0;
     taskQueue = 0;
 
-   NanReturnUndefined();
+   info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(LoadFile)
 {
     //fprintf(stdout, "[%u] nPool - LoadFile\n", SyncGetThreadId());
 
-    NanScope();
+    Nan::HandleScope();
 
     // validate input
-    if((args.Length() != 2) || !args[0]->IsNumber() || !args[1]->IsString())
+    if((info.Length() != 2) || !info[0]->IsNumber() || !info[1]->IsString())
     {
-        return NanThrowError("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string)");
+        return Nan::ThrowError("loadFile() - Expects 2 arguments: 1) file key (uint32) 2) file path (string)");
     }
 
     // file key
-    uint32_t fileKey = (args[0])->ToUint32()->Value();
-    NanUtf8String filePath(args[1]);
+    uint32_t fileKey = (info[0])->ToUint32()->Value();
+    Nan::Utf8String filePath(info[1]);
 
     // ensure file was loaded successfully
     LOAD_FILE_STATUS fileStatus = fileManager->LoadFile(fileKey, *filePath);
     if(fileStatus != LOAD_FILE_SUCCESS)
     {
-        return NanThrowError("loadFile() - Failed to load file. Check if file exists.");
+        return Nan::ThrowError("loadFile() - Failed to load file. Check if file exists.");
     }
 
-    NanReturnUndefined();
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(RemoveFile)
 {
     //fprintf(stdout, "[%u] nPool - RemoveFile\n", SyncGetThreadId());
 
-    NanScope();
+    Nan::HandleScope();
 
     // validate input
-    if((args.Length() != 1) || !args[0]->IsNumber())
+    if((info.Length() != 1) || !info[0]->IsNumber())
     {
-        return NanThrowError("loadFile() - Expects 1 argument: 1) file key (uint32)");
-        NanReturnUndefined();
+        return Nan::ThrowError("loadFile() - Expects 1 argument: 1) file key (uint32)");
+        info.GetReturnValue().Set(Nan::Undefined());
     }
 
     // file key
-    Local<Uint32> v8FileKey = (args[0])->ToUint32();
+    Local<Uint32> v8FileKey = (info[0])->ToUint32();
     uint32_t fileKey = v8FileKey->Value();
 
     fileManager->RemoveFile(fileKey);
 
-    NanReturnUndefined();
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(QueueWork)
 {
     //fprintf(stdout, "[%u] nPool - Work\n", SyncGetThreadId());
 
-    NanScope();
+    Nan::HandleScope();
 
     // validate input
-    if((args.Length() != 1) || !args[0]->IsObject())
+    if((info.Length() != 1) || !info[0]->IsObject())
     {
-        return NanThrowError("work() - Expects 1 argument: 1) work item (object)");
+        return Nan::ThrowError("work() - Expects 1 argument: 1) work item (object)");
     }
 
     // get object from argument
-    Handle<Value> v8Object = args[0];
+    Handle<Value> v8Object = info[0];
     THREAD_WORK_ITEM* workItem = Thread::BuildWorkItem(v8Object->ToObject());
 
     if(workItem == NULL)
     {
-        return NanThrowError("queueWork() - Work item is malformed");
+        return Nan::ThrowError("queueWork() - Work item is malformed");
     }
     else
     {
@@ -200,35 +200,27 @@ NAN_METHOD(QueueWork)
         Thread::QueueWorkItem(taskQueue, workItem);
     }
 
-    NanReturnUndefined();
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 /*---------------------------------------------------------------------------*/
 /* NODE INITIALIZATION */
 /*---------------------------------------------------------------------------*/
 
-void init(Handle<Object> exports)
+void Init(Local<Object> exports)
 {
+
     // static object initialization
 
     fileManager = &(FileManager::GetInstance());
 
     // module initialization
 
-    exports->Set(NanNew<String>("createThreadPool"),
-      NanNew<FunctionTemplate>(CreateThreadPool)->GetFunction());
-
-    exports->Set(NanNew<String>("destroyThreadPool"),
-      NanNew<FunctionTemplate>(DestoryThreadPool)->GetFunction());
-
-    exports->Set(NanNew<String>("loadFile"),
-      NanNew<FunctionTemplate>(LoadFile)->GetFunction());
-
-    exports->Set(NanNew<String>("removeFile"),
-      NanNew<FunctionTemplate>(RemoveFile)->GetFunction());
-
-    exports->Set(NanNew<String>("queueWork"),
-      NanNew<FunctionTemplate>(QueueWork)->GetFunction());
+    Nan::SetMethod(exports, "createThreadPool",     CreateThreadPool);
+    Nan::SetMethod(exports, "destroyThreadPool",    DestoryThreadPool);
+    Nan::SetMethod(exports, "loadFile",             LoadFile);
+    Nan::SetMethod(exports, "removeFile",           RemoveFile);
+    Nan::SetMethod(exports, "queueWork",            QueueWork);
 }
 
-NODE_MODULE(npool, init)
+NODE_MODULE(npool, Init)

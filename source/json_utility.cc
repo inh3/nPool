@@ -8,38 +8,46 @@
 // custom source
 #include "utilities.h"
 
-NanUtf8String* JsonUtility::Stringify(Handle<Value> valueHandle)
+Nan::Utf8String* JsonUtility::Stringify(Local<Value> valueHandle)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // get reference to JSON object
-    Handle<Object> contextObject = NanGetCurrentContext()->Global();
-    Handle<Object> jsonObject = contextObject->Get(NanNew<String>("JSON"))->ToObject();
-    Handle<Function> stringifyFunc = jsonObject->Get(NanNew<String>("stringify")).As<Function>();
+    Local<Object> contextObject = Nan::GetCurrentContext()->Global();
+
+    Local<String> propertyName = Nan::New<String>("JSON").ToLocalChecked();
+    Local<Object> jsonObject = Nan::To<Object>(Nan::Get(contextObject, propertyName).ToLocalChecked()).ToLocalChecked();
+
+    propertyName = Nan::New<String>("stringify").ToLocalChecked();
+    Local<Function> stringifyFunc = Nan::Get(jsonObject, propertyName).ToLocalChecked().As<Function>();
 
     // execute stringify
-    Handle<Value> stringifyResult = stringifyFunc->Call(jsonObject, 1, &valueHandle);
-    return new NanUtf8String(stringifyResult);
+    Local<Value> stringifyResult = stringifyFunc->Call(jsonObject, 1, &valueHandle);
+    return new Nan::Utf8String(stringifyResult);
 }
 
-Handle<Value> JsonUtility::Parse(char* objectString)
+Local<Value> JsonUtility::Parse(char* objectString)
 {
-    NanEscapableScope();
+    Nan::EscapableHandleScope scope;
 
     // short circuit if bad object
     if(objectString == NULL)
     {
-        return NanEscapeScope(NanUndefined());
+        return scope.Escape(Nan::Undefined());
     }
 
     // get reference to JSON object
-    Handle<Object> contextObject = NanGetCurrentContext()->Global();
-    Handle<Object> jsonObject = contextObject->Get(NanNew<String>("JSON"))->ToObject();
-    Handle<Function> parseFunc = jsonObject->Get(NanNew<String>("parse")).As<Function>();
+    Local<Object> contextObject = Nan::GetCurrentContext()->Global();
+
+    Local<String> propertyName = Nan::New<String>("JSON").ToLocalChecked();
+    Local<Object> jsonObject = Nan::To<Object>(Nan::Get(contextObject, propertyName).ToLocalChecked()).ToLocalChecked();
+
+    propertyName = Nan::New<String>("parse").ToLocalChecked();
+    Local<Function> parseFunc = Nan::Get(jsonObject, propertyName).ToLocalChecked().As<Function>();
 
     // execute parse
-    Handle<Value> jsonString = NanNew<String>(objectString);
+    Local<Value> jsonString = Nan::New<String>(objectString).ToLocalChecked();
     Local<Value> valueHandle = parseFunc->Call(jsonObject, 1, &jsonString);
 
-    return NanEscapeScope(valueHandle);
+    return scope.Escape(valueHandle);
 }

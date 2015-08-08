@@ -73,7 +73,7 @@ describe("createThreadPool() shall throw an exception when called more than once
 
 describe("createThreadPool() shall throw an exception when passed zero arguments.", function() {
     var thrownException = null;
-    
+
     after(function() {
         if(thrownException == null) {
             nPool.destroyThreadPool();

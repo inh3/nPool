@@ -9,92 +9,114 @@
 
 static NAN_METHOD(ConsoleLog)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // validate input
-    if(args.Length() > 1)
+    if(info.Length() > 1)
     {
-        return NanThrowTypeError("console.log - Expects only 1 argument.");
+        return Nan::ThrowTypeError("console.log - Expects only 1 argument.");
     }
 
     // get log message
-    if(args.Length() == 0)
+    if(info.Length() == 0)
     {
         printf("\n");
     }
     else
     {
-        NanUtf8String* utf8String = JsonUtility::Stringify(args[0]);
+        Nan::Utf8String* utf8String = JsonUtility::Stringify(info[0]);
         printf("%s\n", **utf8String);
         delete utf8String;
     }
-
-    NanReturnUndefined();
 }
 
-void IsolateContext::CreateGlobalContext(Handle<Object> globalContext)
+void IsolateContext::CreateGlobalContext(Local<Object> globalContext)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // global namespace object
-    globalContext->Set(NanNew<String>("global"), NanNew<Object>());
+    Nan::Set(globalContext, Nan::New<String>("global").ToLocalChecked(), Nan::New<Object>());
 
     // require(...)
 
     // get handle to nRequire function
-    Local<FunctionTemplate> functionTemplate = NanNew<FunctionTemplate>(Require::RequireFunction);
+    Local<FunctionTemplate> functionTemplate = Nan::New<FunctionTemplate>(Require::RequireFunction);
     Local<Function> requireFunction = functionTemplate->GetFunction();
-    requireFunction->SetName(NanNew<String>("require"));
+    requireFunction->SetName(Nan::New<String>("require").ToLocalChecked());
 
     // attach function to context
-    globalContext->Set(NanNew<String>("require"), requireFunction);
+    Nan::Set(globalContext, Nan::New<String>("require").ToLocalChecked(), requireFunction);
 
     // console.log(...)
 
     // setup console object
-    Handle<Object> consoleObject = NanNew<Object>();
+    Local<Object> consoleObject = Nan::New<Object>();
 
     // get handle to log function
-    Local<FunctionTemplate> logTemplate = NanNew<FunctionTemplate>(ConsoleLog);
+    Local<FunctionTemplate> logTemplate = Nan::New<FunctionTemplate>(ConsoleLog);
     Local<Function> logFunction = logTemplate->GetFunction();
-    logFunction->SetName(NanNew<String>("log"));
+    logFunction->SetName(Nan::New<String>("log").ToLocalChecked());
 
     // attach log function to console object
-    consoleObject->Set(NanNew<String>("log"), logFunction);
+    Nan::Set(consoleObject, Nan::New<String>("log").ToLocalChecked(), logFunction);
 
     // attach object to context
-    globalContext->Set(NanNew<String>("console"), consoleObject);
+    Nan::Set(globalContext, Nan::New<String>("console").ToLocalChecked(), consoleObject);
 
 }
 
-void IsolateContext::UpdateContextFileProperties(Handle<Object> contextObject, const FILE_INFO* fileInfo)
+void IsolateContext::UpdateContextFileProperties(Local<Object> contextObject, const FILE_INFO* fileInfo)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // set the file properites on the context
-    contextObject->Set(NanNew<String>("__dirname"), NanNew<String>(fileInfo->folderPath));
-    contextObject->Set(NanNew<String>("__filename"), NanNew<String>(fileInfo->fullPath));
+    Nan::Set(
+        contextObject,
+        Nan::New<String>("__dirname").ToLocalChecked(),
+        Nan::New<String>(fileInfo->folderPath).ToLocalChecked());
+    Nan::Set(
+        contextObject,
+        Nan::New<String>("__filename").ToLocalChecked(),
+        Nan::New<String>(fileInfo->fullPath).ToLocalChecked());
 }
 
-void IsolateContext::CloneGlobalContextObject(Handle<Object> sourceObject, Handle<Object> cloneObject)
+void IsolateContext::CloneGlobalContextObject(Local<Object> sourceObject, Local<Object> cloneObject)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // copy global properties
-    cloneObject->Set(NanNew<String>("global"), sourceObject->Get(NanNew<String>("global")));
-    cloneObject->Set(NanNew<String>("require"), sourceObject->Get(NanNew<String>("require")));
-    cloneObject->Set(NanNew<String>("console"), sourceObject->Get(NanNew<String>("console")));
+    Nan::Set(
+        cloneObject,
+        Nan::New<String>("global").ToLocalChecked(),
+        Nan::Get(
+            sourceObject,
+            Nan::New<String>("global").ToLocalChecked()).ToLocalChecked());
+    Nan::Set(
+        cloneObject,
+        Nan::New<String>("require").ToLocalChecked(),
+        Nan::Get(
+            sourceObject,
+            Nan::New<String>("require").ToLocalChecked()).ToLocalChecked());
+    Nan::Set(
+        cloneObject,
+        Nan::New<String>("console").ToLocalChecked(),
+        Nan::Get(
+            sourceObject,
+            Nan::New<String>("console").ToLocalChecked()).ToLocalChecked());
 }
 
-void IsolateContext::CreateModuleContext(Handle<Object> contextObject, const FILE_INFO* fileInfo)
+void IsolateContext::CreateModuleContext(Local<Object> contextObject, const FILE_INFO* fileInfo)
 {
-    NanScope();
+    Nan::HandleScope scope;
 
     // create the module/exports within context
-    Handle<Object> moduleObject = NanNew<Object>();
-    moduleObject->Set(NanNew<String>("exports"), NanNew<Object>());
-    contextObject->Set(NanNew<String>("module"), moduleObject);
-    contextObject->Set(NanNew<String>("exports"), moduleObject->Get(NanNew<String>("exports"))->ToObject());
+    Local<Object> moduleObject = Nan::New<Object>();
+    Nan::Set(moduleObject, Nan::New<String>("exports").ToLocalChecked(), Nan::New<Object>());
+    Nan::Set(contextObject, Nan::New<String>("module").ToLocalChecked(), moduleObject);
+    Nan::Set(
+        contextObject,
+        Nan::New<String>("exports").ToLocalChecked(),
+        Nan::Get(moduleObject, Nan::New<String>("exports").ToLocalChecked()).ToLocalChecked());
 
     // copy file properties
     if(fileInfo != NULL)

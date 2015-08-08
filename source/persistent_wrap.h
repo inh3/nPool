@@ -16,7 +16,7 @@ class PersistentWrap : public node::ObjectWrap
         // Ref(), Unref() and Wrap()
         virtual void Ref() { node::ObjectWrap::Ref(); }
         virtual void Unref() { node::ObjectWrap::Unref(); }
-        virtual void Wrap(Handle<Object> handle) { node::ObjectWrap::Wrap(handle); }
+        virtual void Wrap(Local<Object> handle) { node::ObjectWrap::Wrap(handle); }
 
     //private:
 
