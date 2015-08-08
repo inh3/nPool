@@ -207,7 +207,11 @@ NAN_METHOD(QueueWork)
 /* NODE INITIALIZATION */
 /*---------------------------------------------------------------------------*/
 
+#if NODE_VERSION_AT_LEAST(0, 9, 0)
 void Init(Local<Object> exports)
+#else
+void Init(Handle<Object> exports)
+#endif
 {
 
     // static object initialization
