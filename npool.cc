@@ -187,7 +187,7 @@ NAN_METHOD(QueueWork)
     }
 
     // get object from argument
-    Handle<Value> v8Object = info[0];
+    Local<Value> v8Object = info[0];
     THREAD_WORK_ITEM* workItem = Thread::BuildWorkItem(v8Object->ToObject());
 
     if(workItem == NULL)
