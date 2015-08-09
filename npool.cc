@@ -100,7 +100,7 @@ NAN_METHOD(CreateThreadPool)
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
     threadPool = CreateThreadPool(numThreads, taskQueue, Thread::ThreadInit, Thread::ThreadPostInit, Thread::ThreadDestroy);
 
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(DestoryThreadPool)
@@ -123,7 +123,7 @@ NAN_METHOD(DestoryThreadPool)
     threadPool = 0;
     taskQueue = 0;
 
-   info.GetReturnValue().Set(Nan::Undefined());
+   info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(LoadFile)
@@ -149,7 +149,7 @@ NAN_METHOD(LoadFile)
         return Nan::ThrowError("loadFile() - Failed to load file. Check if file exists.");
     }
 
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(RemoveFile)
@@ -162,7 +162,7 @@ NAN_METHOD(RemoveFile)
     if((info.Length() != 1) || !info[0]->IsNumber())
     {
         return Nan::ThrowError("loadFile() - Expects 1 argument: 1) file key (uint32)");
-        info.GetReturnValue().Set(Nan::Undefined());
+        info.GetReturnValue().SetUndefined();
     }
 
     // file key
@@ -171,7 +171,7 @@ NAN_METHOD(RemoveFile)
 
     fileManager->RemoveFile(fileKey);
 
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(QueueWork)
@@ -200,7 +200,7 @@ NAN_METHOD(QueueWork)
         Thread::QueueWorkItem(taskQueue, workItem);
     }
 
-    info.GetReturnValue().Set(Nan::Undefined());
+    info.GetReturnValue().SetUndefined();
 }
 
 /*---------------------------------------------------------------------------*/

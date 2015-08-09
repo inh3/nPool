@@ -88,7 +88,7 @@ NAN_METHOD(Require::RequireFunction)
             {
                 Require::FreeFileInfo((FILE_INFO*)fileInfo);
                 scriptTryCatch.ReThrow();
-                info.GetReturnValue().Set(Nan::Undefined());
+                info.GetReturnValue().SetUndefined();
                 return;
             }
 
@@ -101,7 +101,7 @@ NAN_METHOD(Require::RequireFunction)
             {
                 Require::FreeFileInfo((FILE_INFO*)fileInfo);
                 scriptTryCatch.ReThrow();
-                info.GetReturnValue().Set(Nan::Undefined());
+                info.GetReturnValue().SetUndefined();
                 return;
             }
         }
