@@ -220,11 +220,11 @@ void Init(Handle<Object> exports)
 
     // module initialization
 
-    Nan::SetMethod(exports, "createThreadPool",     CreateThreadPool);
-    Nan::SetMethod(exports, "destroyThreadPool",    DestoryThreadPool);
-    Nan::SetMethod(exports, "loadFile",             LoadFile);
-    Nan::SetMethod(exports, "removeFile",           RemoveFile);
-    Nan::SetMethod(exports, "queueWork",            QueueWork);
+    Nan::Export(exports, "createThreadPool",     CreateThreadPool);
+    Nan::Export(exports, "destroyThreadPool",    DestoryThreadPool);
+    Nan::Export(exports, "loadFile",             LoadFile);
+    Nan::Export(exports, "removeFile",           RemoveFile);
+    Nan::Export(exports, "queueWork",            QueueWork);
 }
 
 NODE_MODULE(npool, Init)
