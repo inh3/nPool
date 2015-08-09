@@ -23,8 +23,6 @@ using namespace v8;
 #include "task_queue.h"
 #include "thread_pool.h"
 
-#include "persistent_wrap.h"
-
 // thread module map
 typedef unordered_map<uint32_t, Nan::Persistent<Object>*> ThreadModuleMap;
 
