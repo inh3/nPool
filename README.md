@@ -1,6 +1,6 @@
 # nPool [![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool) [![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool)
 
-A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/addons.html).
+A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/addons.html) and [io.js](https://iojs.org/api/addons.html).
 
 **nPool's primary features and benefits include:**
 
