@@ -15,7 +15,21 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
  * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
- * Support for [Node.js](https://nodejs.org) 0.8/0.10/0.12 and [io.js](https://iojs.org)
+ * Support for all stable [Node.js](https://nodejs.org) and [io.js](https://iojs.org) releases
+
+## Version Support
+
+### Node.js
+
+ * 0.8
+ * 0.10
+ * 0.12
+
+### io.js
+
+ * 1.x.x
+ * 2.x.x
+ * 3.x.x
 
 ## Table of Contents
 
@@ -263,7 +277,7 @@ A `unitOfWorkObject` contains the following named properties:
  * `workParam` *object* - This is user defined object that is the input for the task.  The object will be passed as the only parameter to the object instance method that is executed in the thread pool.  Any function properties on the object will not be available when it is used in the thread pool because serialization does not support packing functions.
 
  * `callbackFunction` *function* - This property specifies the work complete callback function.  The function is executed on the main Node.js thread.
-The work complete callback function takes two parameters:
+The work complete callback function takes the following parameters:
   * `callbackObject` *object* - the object that is returned by the `workFunction`
   * `workId` *uint32* -  the unique identifier, `workId`, that was passed with the unit of work when it was queued
   * `exceptionObject` *object* -  the object that contains exception information
