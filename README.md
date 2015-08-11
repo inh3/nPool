@@ -15,21 +15,16 @@ A platform independent thread pool [add-on for Node.js](http://nodejs.org/api/ad
  * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
  * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
- * Support for all stable [Node.js](https://nodejs.org) and [io.js](https://iojs.org) releases
 
-## Version Support
+**Support for all stable [Node.js](https://nodejs.org) and [io.js](https://iojs.org) releases:**
 
-### Node.js
+###### Node.js
 
- * 0.8
- * 0.10
- * 0.12
+ * 0.8.x, 0.10.x, 0.12.x
 
-### io.js
+###### io.js
 
- * 1.x.x
- * 2.x.x
- * 3.x.x
+ * 1.x.x, 2.x.x, 3.x.x
 
 ## Table of Contents
 
