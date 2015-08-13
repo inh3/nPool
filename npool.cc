@@ -35,7 +35,6 @@
 
 // namespace
 using namespace v8;
-using namespace std;
 
 /*---------------------------------------------------------------------------*/
 /* MACRO DEFINITIONS */

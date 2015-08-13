@@ -5,11 +5,9 @@
 #include <string>
 #ifdef __APPLE__
 #include <tr1/unordered_map>
-using namespace std::tr1;
 #else
 #include <unordered_map>
 #endif
-using namespace std;
 
 // libuv
 #include <uv.h>
@@ -20,7 +18,11 @@ using namespace std;
 // custom
 #include "utilities.h"
 
-typedef unordered_map<uint32_t, const FILE_INFO*> FileMap;
+#ifdef __APPLE__
+typedef std::tr1::unordered_map<uint32_t, const FILE_INFO*> FileMap;
+#else
+typedef std::unordered_map<uint32_t, const FILE_INFO*> FileMap;
+#endif
 
 // success/fail of adding a task item to the queue
 typedef enum LOAD_FILE_STATUS_ENUM
@@ -39,7 +41,7 @@ typedef enum LOAD_FILE_STATUS_ENUM
 class FileManager
 {
     public:
-        
+
         // singleton instance of class
         static FileManager& GetInstance();
 

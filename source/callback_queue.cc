@@ -18,7 +18,7 @@ CallbackQueue& CallbackQueue::GetInstance()
 CallbackQueue::CallbackQueue()
 {
     // create queue
-    callbackQueue = new queue<THREAD_WORK_ITEM*>();
+    callbackQueue = new std::queue<THREAD_WORK_ITEM*>();
 
     // create file map mutex
     SyncCreateMutex(&(this->queueMutex), 0);

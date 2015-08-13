@@ -4,10 +4,8 @@
 // C++
 #ifdef __APPLE__
 #include <tr1/unordered_map>
-using namespace std::tr1;
 #else
 #include <unordered_map>
-using namespace std;
 #endif
 
 // node
@@ -24,7 +22,11 @@ using namespace v8;
 #include "thread_pool.h"
 
 // thread module map
-typedef unordered_map<uint32_t, Nan::Persistent<Object>*> ThreadModuleMap;
+#ifdef __APPLE__
+typedef std::tr1::unordered_map<uint32_t, Nan::Persistent<Object>*> ThreadModuleMap;
+#else
+typedef std::unordered_map<uint32_t, Nan::Persistent<Object>*> ThreadModuleMap;
+#endif
 
 typedef struct THREAD_CONTEXT_STRUCT
 {

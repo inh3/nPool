@@ -427,7 +427,7 @@ Local<Object> Thread::GetWorkerObject(THREAD_CONTEXT* thisContext, THREAD_WORK_I
                 // cache the persistent object type for later use
                 // wrap the object so it can be persisted
                 Nan::Persistent<Object>* pObject = new Nan::Persistent<Object>(workerObject);
-                thisContext->moduleMap->insert(make_pair(
+                thisContext->moduleMap->insert(std::make_pair(
                     workItem->fileKey,
                     pObject));
             }

@@ -3,7 +3,6 @@
 
 // C++
 #include <queue>
-using namespace std;
 
 // custom source
 #include "thread.h"
@@ -12,7 +11,7 @@ using namespace std;
 class CallbackQueue
 {
     public:
-        
+
         // singleton instance of class
         static CallbackQueue&   GetInstance();
 
@@ -36,7 +35,7 @@ class CallbackQueue
 
     private:
 
-        queue<THREAD_WORK_ITEM*>    *callbackQueue;
+        std::queue<THREAD_WORK_ITEM*>    *callbackQueue;
         THREAD_MUTEX                queueMutex;
 };
 

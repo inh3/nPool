@@ -3,7 +3,7 @@
   "name": "npool",
   "version": "1.4.2",
   "main": "./build/Release/npool.node",
-  "description": "A cross-platform thread pool add-on for Node.js",
+  "description": "A cross-platform thread pool add-on for Node.js and io.js",
   "keywords": [
     "c",
     "c++",
@@ -32,7 +32,7 @@
     "email": "ivan.hall@gmail.com"
   },
   "analyze": false,
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "os": [
     "darwin",
     "linux",
