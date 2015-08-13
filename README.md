@@ -1,4 +1,4 @@
-# nPool [![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool) [![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool)
+# nPool [![NPM version](https://badge.fury.io/js/npool.png)](http://badge.fury.io/js/npool) [![Build Status](https://travis-ci.org/inh3/nPool.png)](https://travis-ci.org/inh3/nPool) [![Build status](https://ci.appveyor.com/api/projects/status/h11e52tnnk1a7gr3)](https://ci.appveyor.com/project/inh3/npool)
 
 A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/addons.html) and [io.js](https://iojs.org/api/addons.html).
 
@@ -59,8 +59,7 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.8/0.10/0.12, io.js
- * Node.js 0.8 is only supported for Mac and Linux
+* Node.js 0.8/0.10/0.12, io.js v1/v2/v3
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11
