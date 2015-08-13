@@ -28,7 +28,6 @@ test_script:
   # Output useful info for debugging
   - node --version
   - npm --version
-  - node-gyp --version
   # Run tests
   - node_modules\.bin\mocha --reporter spec
 
