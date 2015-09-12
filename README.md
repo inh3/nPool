@@ -20,7 +20,7 @@ A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/ad
 
 ###### Node.js
 
- * 0.8.x, 0.10.x, 0.12.x
+ * 0.8.x, 0.10.x, 0.12.x, 4.x.x
 
 ###### io.js
 
@@ -59,7 +59,7 @@ This will automatically configure the environment and produce the add-on module.
 
 **Requirements:**
 
-* Node.js 0.8/0.10/0.12, io.js v1/v2/v3
+* Node.js or io.js
 * Standard C and C++ libraries
  * Windows: C++11
  * Linux: C++0x/C++11

@@ -4,7 +4,9 @@
     # npool .node
     {
         'target_name': 'npool',
-        'win_delay_load_hook': 'true',
+
+        # only use windows delayed load hook for iojs versions
+        'win_delay_load_hook': "<!(node -e \"var v = process.version.substring(1,2); console.log(v > 0 && v < 4);\")",
 
         'sources': [
             'npool.cc',
@@ -20,6 +22,7 @@
         'include_dirs': [
             './threadpool',
             './source',
+            './source/v8',
             "<!(node -e \"require('nan')\")"
         ],
 

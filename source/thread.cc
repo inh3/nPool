@@ -12,11 +12,19 @@
 #include "callback_queue.h"
 #include "isolate_context.h"
 
+#include "array_buffer_allocator.h"
+
 // file loader and hash (npool.cc)
 static FileManager *fileManager = &(FileManager::GetInstance());
 
 // callback queue
 static CallbackQueue *callbackQueue = &(CallbackQueue::GetInstance());
+
+// array buffer allocator
+// node version 4 requires array buffer allocator for isolates
+#if NODE_MAJOR_VERSION == 4
+    static ArrayBufferAllocator arrayBufferAllocator;
+#endif
 
 void* Thread::ThreadInit()
 {
@@ -31,7 +39,14 @@ void* Thread::ThreadInit()
     threadContext->uvAsync->close_cb = Thread::uvCloseCallback;
 
     // create thread isolate
-    threadContext->threadIsolate = Isolate::New();
+    // node version 4 requires array buffer allocator for isolates
+    #if NODE_MAJOR_VERSION == 4
+        Isolate::CreateParams create_params;
+        create_params.array_buffer_allocator = &arrayBufferAllocator;
+        threadContext->threadIsolate = Isolate::New(create_params);
+    #else
+        threadContext->threadIsolate = Isolate::New();
+    #endif
 
     // create module map
     threadContext->moduleMap = new ThreadModuleMap();

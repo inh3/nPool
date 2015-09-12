@@ -14,6 +14,12 @@ node_js:
   - "0.12"
   - "iojs-v1"
   - "iojs-v2"
-  - "iojs"
+  - "iojs-v3"
+  - "4"
 before_install:
   - $CXX --version
+install:
+  - NODE_VERSION=$(node --version)
+  - if [[ $NODE_VERSION == "v0.8.28" ]]; then npm -g install npm; fi
+  - npm install
+  - make test
