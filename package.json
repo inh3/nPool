@@ -1,7 +1,7 @@
 {
   "preferGlobal": false,
   "name": "npool",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "main": "./build/Release/npool.node",
   "description": "A cross-platform thread pool add-on for Node.js and io.js",
   "keywords": [
@@ -39,7 +39,7 @@
     "win32"
   ],
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.8.28"
   },
   "engine-strict": true,
   "devDependencies": {
@@ -49,6 +49,6 @@
     "test": "make test"
   },
   "dependencies": {
-    "nan": ">= 2.0.9"
+    "nan": ">= 2.1.0"
   }
 }

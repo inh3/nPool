@@ -1,25 +1,33 @@
+os:
+  - linux
+  - osx
 sudo: false
-language: node_js
-env:
-  - CXX=g++-4.8
+language: cpp
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+        - ubuntu-toolchain-r-test
     packages:
-      - g++-4.8
-node_js:
-  - "0.8"
-  - "0.10"
-  - "0.12"
-  - "iojs-v1"
-  - "iojs-v2"
-  - "iojs-v3"
-  - "4"
-before_install:
-  - $CXX --version
+        - g++-4.8
+env:
+  matrix:
+  - TRAVIS_NODE_VERSION="0.8"
+  - TRAVIS_NODE_VERSION="0.10"
+  - TRAVIS_NODE_VERSION="0.12"
+  - TRAVIS_NODE_VERSION="iojs-v1"
+  - TRAVIS_NODE_VERSION="iojs-v2"
+  - TRAVIS_NODE_VERSION="iojs-v3"
+  - TRAVIS_NODE_VERSION="4"
+notifications:
+  email:
+    - ivan.hall@gmail.com
 install:
-  - NODE_VERSION=$(node --version)
-  - if [[ $NODE_VERSION == "v0.8.28" ]]; then npm -g install npm; fi
-  - npm install
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - if [[ $TRAVIS_NODE_VERSION == "0.8" ]]; then npm install npm@2 && node_modules/.bin/npm install npm; else npm install npm; fi
+  - mv node_modules npm
+  - npm/.bin/npm --version
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
+  - $CXX --version
+  - npm/.bin/npm install
+script:
   - make test

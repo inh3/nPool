@@ -20,11 +20,14 @@ install:
   # Get the latest stable version of Node.js or io.js
   - ps: if($env:nodejs_version -eq "0.8") {Install-Product node $env:nodejs_version $env:platform}
   - ps: if($env:nodejs_version -ne "0.8") {Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version $env:platform)}
-  # Install latest npm for 0.8, 0.10 and 0.12
-  - IF %nodejs_version% == 0.8 npm -g install npm
+  # Install latest npm for 0.8
+  - IF %nodejs_version% == 0.8 npm -g install npm@2
   - IF %nodejs_version% == 0.8 set PATH=%APPDATA%\npm;%PATH%
+  - IF %nodejs_version% == 0.8 npm -g install npm
+  # Install latest npm for 0.10
   - IF %nodejs_version% == 0.10 npm -g install npm
   - IF %nodejs_version% == 0.10 set PATH=%APPDATA%\npm;%PATH%
+  # Install latest npm for 0.12
   - IF %nodejs_version% == 0.12 npm -g install npm
   - IF %nodejs_version% == 0.12 set PATH=%APPDATA%\npm;%PATH%
   # Install the module under test
