@@ -5,6 +5,7 @@ A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/ad
 **nPool's primary features and benefits include:**
 
  * Linux, Mac and Windows support
+   * CI with automated testing on all platforms
  * Efficient and straightforward interface
  * Emulated [Node.js module](http://nodejs.org/api/modules.html#modules_modules) loading system within threads
  * Transparent marshalling of Javascript objects in and out of the thread pool
@@ -21,7 +22,6 @@ A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/ad
 ###### Node.js
 
  * 0.8.x, 0.10.x, 0.12.x, 4.x.x
- * CI with automated testing on OS X, Linux and Windows
 
 ###### io.js
 
