@@ -3,7 +3,7 @@
 
 // node version 4 requires array buffer allocator for isolates
 // http://stackoverflow.com/a/30424476
-#if NODE_MAJOR_VERSION == 4
+#if NODE_MAJOR_VERSION >= 4
 
 #include <stdlib.h>
 #include <string.h>

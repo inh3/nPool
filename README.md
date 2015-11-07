@@ -21,7 +21,7 @@ A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/ad
 
 ###### Node.js
 
- * 0.8.x, 0.10.x, 0.12.x, 4.x.x
+ * 0.8.x, 0.10.x, 0.12.x, 4.x.x, 5.x.x
 
 ###### io.js
 

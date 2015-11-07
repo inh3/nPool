@@ -22,7 +22,7 @@ static CallbackQueue *callbackQueue = &(CallbackQueue::GetInstance());
 
 // array buffer allocator
 // node version 4 requires array buffer allocator for isolates
-#if NODE_MAJOR_VERSION == 4
+#if NODE_MAJOR_VERSION >= 4
     static ArrayBufferAllocator arrayBufferAllocator;
 #endif
 
@@ -40,7 +40,7 @@ void* Thread::ThreadInit()
 
     // create thread isolate
     // node version 4 requires array buffer allocator for isolates
-    #if NODE_MAJOR_VERSION == 4
+    #if NODE_MAJOR_VERSION >= 4
         Isolate::CreateParams create_params;
         create_params.array_buffer_allocator = &arrayBufferAllocator;
         threadContext->threadIsolate = Isolate::New(create_params);
