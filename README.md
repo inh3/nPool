@@ -373,7 +373,7 @@ The reference implementation provided with the source ([`./example`](https://git
 ## License
 
 ```
-Copyright (c) 2013, Ivan Hall <ivan.hall@gmail.com>
+Copyright (c) 2015, Ivan Hall <ivan.hall@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
