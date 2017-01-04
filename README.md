@@ -15,7 +15,7 @@ A platform independent thread pool add-on for [Node.js](http://nodejs.org/api/ad
  * Exception and error handling within background threads
  * Node.js [global object](http://nodejs.org/api/globals.html) support within background threads
    * `console.log`, `__filename`, `__dirname`, `require`
- * Verified and validated with a comprehensive [mocha](http://visionmedia.github.io/mocha/) test suite
+ * Verified and validated with a comprehensive [mocha](http://mochajs.org/) test suite
 
 **Support for all stable [Node.js](https://nodejs.org) and [io.js](https://iojs.org) releases:**
 
