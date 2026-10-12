@@ -39,7 +39,7 @@ using namespace v8;
 /*---------------------------------------------------------------------------*/
 /* MACRO DEFINITIONS */
 /*---------------------------------------------------------------------------*/
-
+#define MAX_THREAD_POOL_SIZE 1024
 #define TASK_QUEUE_ID       1
 
 /*---------------------------------------------------------------------------*/
@@ -93,11 +93,22 @@ NAN_METHOD(CreateThreadPool)
     Local<Uint32> v8NumThreads = (info[0])->ToUint32();
     uint32_t numThreads = v8NumThreads->Value();
 
+    if((numThreads == 0) || (numThreads > MAX_THREAD_POOL_SIZE))
+    {
+        return Nan::ThrowError("createThreadPool() - Number of threads must be between 1 and 1024");
+    }
+
     //fprintf(stdout, "[%u] nPool - Num Threads: %u\n", SyncGetThreadId(), numThreads);
 
     // create task queue and thread pool
     taskQueue = CreateTaskQueue(TASK_QUEUE_ID);
     threadPool = CreateThreadPool(numThreads, taskQueue, Thread::ThreadInit, Thread::ThreadPostInit, Thread::ThreadDestroy);
+    if(threadPool == 0)
+    {
+        DestroyTaskQueue(taskQueue);
+        taskQueue = 0;
+        return Nan::ThrowError("createThreadPool() - Failed to allocate the thread pool");
+    }
 
     info.GetReturnValue().SetUndefined();
 }

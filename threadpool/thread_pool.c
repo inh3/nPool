@@ -192,6 +192,10 @@ THREAD_POOL_DATA* CreateThreadPool(
 
     // create thread pool
     THREAD_POOL_DATA *threadPool = (THREAD_POOL_DATA*)malloc(sizeof(THREAD_POOL_DATA));
+    if(threadPool == NULL)
+    {
+        return NULL;
+    }
     memset(threadPool, 0, sizeof(THREAD_POOL_DATA));
 
     // store number of threads
@@ -202,16 +206,30 @@ THREAD_POOL_DATA* CreateThreadPool(
 
     // allocate memory for thread ids
     threadPool->threadIds = (THREAD*)malloc(numThreads * sizeof(THREAD));
-
+    if(threadPool->threadIds == NULL)
+    {
+        free(threadPool);
+        return NULL;
+    }
+    
     // create each thread
     for(i = 0; i < numThreads; i++)
     {
         // create thread context
         threadData = (THREAD_DATA*)malloc(sizeof(THREAD_DATA));
+        if(threadData == NULL)
+        {
+            break;
+        }
         memset(threadData, 0, sizeof(THREAD_DATA));
 
         // create task queue work data
         threadData->taskQueueWorkData = (TASK_QUEUE_WORK_DATA*)malloc(sizeof(TASK_QUEUE_WORK_DATA));
+        if(threadData->taskQueueWorkData == NULL)
+        {
+            free(threadData);
+            break;
+        }
         memset(threadData->taskQueueWorkData, 0, sizeof(TASK_QUEUE_WORK_DATA));
         threadData->taskQueueWorkData->queueId = threadPool->taskQueueData->queueId;
 
@@ -239,6 +257,9 @@ THREAD_POOL_DATA* CreateThreadPool(
         //printf("Created Thread: %u (Queue: %u)\n", (unsigned int)threadPool->threadIds[i], threadData->taskQueueWorkData->queueId);
     }
 
+    // only the threads actually created may be joined later
+    threadPool->numThreads = i;
+    
     return threadPool;
 }
 
